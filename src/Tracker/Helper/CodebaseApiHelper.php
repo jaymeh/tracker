@@ -2,10 +2,10 @@
 
 namespace Tracker\Helper;
 
-class ApiHelper {
+class CodebaseApiHelper {
 	private $api_user = 'creode/jamie-sykes-30';
 	private $api_key = 'b9114c3c026dc58212e8e8a44a8c05dc5fcf0f9f';
-	private $site_base_url = 'http://api3.codebasehq.com';
+	private $site_base_url = 'https://api3.codebasehq.com';
 
 	/**
 	 * Calls the api
@@ -19,6 +19,7 @@ class ApiHelper {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		curl_setopt($ch, CURLOPT_USERPWD, "$this->api_user:$this->api_key");
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 		$xml_data = curl_exec($ch);
 
@@ -33,7 +34,7 @@ class ApiHelper {
 		$projects = $this->call('/projects');
 
 		if(count($projects)) {
-			var_dump($projects);
+			return $projects;
 		}
 	}
 }

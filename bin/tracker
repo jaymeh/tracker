@@ -8,6 +8,6 @@ use Tracker\Helper;
 use Symfony\Component\Console\Application;
 
 $application = new Application('Toggl Tracker', '@package_version@');
-$application->add(new Command\HelloCommand());
+$application->add(new Command\ProjectImport());
 $application->add(new Command\UpdateCommand());
 $application->run();
