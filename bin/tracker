@@ -4,6 +4,7 @@
 require __DIR__.'/../vendor/autoload.php';
 
 use Tracker\Command;
+use Tracker\Helper;
 use Symfony\Component\Console\Application;
 
 $application = new Application('Toggl Tracker', '@package_version@');

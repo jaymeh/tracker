@@ -5,6 +5,7 @@ namespace Tracker\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tracker\Helper\ApiHelper;
 
 class HelloCommand extends Command
 {
@@ -14,6 +15,10 @@ class HelloCommand extends Command
             ->setName('hello')
             ->setDescription('Say hello')
         ;
+
+        $api_caller = new ApiHelper();
+
+        $projects = $api_caller->projects();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
