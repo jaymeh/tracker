@@ -1,0 +1,14 @@
+{
+    "name": "jaymeh/toggl-tracker",
+    "description": "Command line tool to convert tracked time in Toggl and push it to Codebase",
+    "license": "MIT",
+    "require": {
+        "symfony/console": "~2.3",
+        "herrera-io/phar-update": "~1.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Tracker": "src"
+        }
+    }
+}
