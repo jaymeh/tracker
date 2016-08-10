@@ -24,33 +24,29 @@ class ProjectImport extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-    	/*$api_caller = new CodebaseApiHelper();
-
-        $projects = $api_caller->projects();
-
-        var_dump($projects); */
-
+    	// Load in toggl helper and bring in workspaces
         $api_caller_toggl = new TogglApiHelper();
         $workspaces = $api_caller_toggl->workspaces();
 
+        // If we don't have any throw an error
         if(empty($workspaces)) {
         	$output->writeln('<error>Couldn\'t find a workspace to use when importing projects. Please check your toggl api key is correct.</error>');
         	return 404;
         }
 
-        $workspace_id = 0;
-
+        // Set the workspace id by default to the first workspace. This can change if we have more than one.
         $workspace_id = $workspaces[0]['id'];
 
+        // Check for the creode workspace
         if(count($workspaces) > 1) {
         	$workspace_names = array();
 
+        	// Loop through workspaces to map what we want.
         	foreach($workspaces as $workspace) {
-        		$workspace_names[] = $workspace['name'];
+        		$workspace_names[] = $workspace['name'].' {'.$workspace['id'].'}';
         	}
 
-        	var_dump($workspace_names);
-
+        	// Allow user to pick which workspace they want to use
         	$question_helper = $this->getHelper('question');
         	$question = new ChoiceQuestion(
         		'Please select which project to use',
@@ -58,26 +54,45 @@ class ProjectImport extends Command
         		'0,1'
         	);
 
+        	// Set a custom error message
         	$question->setErrorMessage('Workspace %s is invalid.');
 
+        	// Ask the question
         	$option_selection = $question_helper->ask($input, $output, $question);
 
-        	$workspace_id = $workspaces[$option_selection]['id'];
+        	// Set the id
+        	$workspace_id = $this->get_string_between($option_selection);
 
-        	// Allow user to pick which workspace to use
+        	// Check the id and if there isn't one then set an error
+        	if($workspace_id == false) {
+        		$question->setErrorMessage('Workspace %s does not contain an id.');
+        	}
         }
 
-        var_dump($workspace_id);
+        // Use the workspace id to create clients and projects
+        $cb_helper = new CodebaseApiHelper();
+       	$codebase_projects = $cb_helper->projects();
+       	
+       	// Loop through the projects
+       	foreach($codebase_projects['project'] as $codebase_project) {
+       		$api_caller_toggl->createClient($codebase_project['name'], $workspace_id);
+       		die;
+       	}
 
-       	$output->writeln($workspace_id);
-
-        if(count($workspaces > 1)) {
-        	// Output a message for which workspace to use and set its id
-        }
         // $output->writeln('Hello World');
     }
 
+    /* Not required now but may be used in future to create a new workspace
     private function registerWorkspace() {
 
-    }
+    } */
+
+    private function get_string_between($string, $start = '{', $end = '}'){
+	    $string = ' ' . $string;
+	    $ini = strpos($string, $start);
+	    if ($ini == 0) { return false; }
+	    $ini += strlen($start);
+	    $len = strpos($string, $end, $ini) - $ini;
+	    return substr($string, $ini, $len);
+	}
 }
