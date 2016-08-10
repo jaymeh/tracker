@@ -28,6 +28,10 @@ class TogglApiHelper {
 	public function workspaces() {
 		$workspace = $this->call('/workspaces');
 
+		$workspace[1] = $workspace[0];
+
+		$workspace[1]['id'] = 58486759;
+
 		if(count($workspace)) {
 			return $workspace;
 		} else {
