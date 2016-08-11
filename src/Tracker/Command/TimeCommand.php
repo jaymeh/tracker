@@ -25,9 +25,9 @@ class TimeCommand extends Command
         $this
             ->setName('time-update')
             ->setDescription('Adds toggl time entries into Codebase')
-           	->addArgument('dateType', InputArgument::REQUIRED, 'Which date would you like to use? Could be one of the following: (today, yesterday, custom)')
-           	->addOption('startDate', null, InputOption::VALUE_NONE, 'If custom is selected you can input a start date in format dd/mm/yyyy')
-           	->addOption('endDate', null, InputOption::VALUE_NONE, 'If custom is selected you can input a end date in format dd/mm/yyyy')
+           	->addArgument('Date Type', InputArgument::REQUIRED, 'Which date would you like to use? Could be one of the following: (today, yesterday, custom)')
+           	->addOption('Start Date', null, InputOption::VALUE_NONE, 'If custom is selected you can input a start date in format dd/mm/yyyy')
+           	->addOption('End Date', null, InputOption::VALUE_NONE, 'If custom is selected you can input a end date in format dd/mm/yyyy')
         ;
     }
 
