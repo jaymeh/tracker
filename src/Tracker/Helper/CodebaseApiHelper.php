@@ -57,7 +57,44 @@ class CodebaseApiHelper {
 	public function getProjectByName($name) {
 		$project = $this->call('/'.$name);
 
-		var_dump($project);
-		die;
+		if(count($project)) {	
+			return $project;
+		}
+	}
+
+	public function updateTicketTime($project, $ticket_id, $time) {
+		// (/project/tickets/ticket_id/notes)
+		/* 
+		<ticket-note>
+		    <content>Updating the Status</content>
+		    <time-added>46</time-added>
+		    <changes>
+		        <status-id>{NEW_ID}</status-id>
+		        <priority-id>{NEW_ID}</priority-id>
+		        <category-id>{NEW_ID}</category-id>
+		        <assignee-id></assignee-id>
+		        <milestone-id></milestone-id>
+		        <summary>A new summary</summary>
+		    </changes>
+		    <upload-tokens type="array">
+		      <upload-token>c2959f1c-0297-0af7-4e52-ed0bc3e2fb02</upload-token>
+		    </upload-tokens>
+		    <private>1</private>
+		</ticket-note>
+		*/
+	}
+
+	public function createTimeSession($project, $note, $time, $date = false) {
+		/* 
+		<time-session>
+		  <id type="integer">1234</id>
+		  <summary>Worked on the awesome time tracking in Codebase</summary>
+		  <minutes type="integer">180</minutes>
+		  <session-date type="date">2009-09-05</session-date>
+		  <user-id type="integer">1234</user-id>
+		  <created-at type="datetime">2013-09-10T18:45:44Z</created-at>
+		  <updated-at type="datetime">2013-09-10T18:45:44Z</updated-at>
+		</time-session>
+		*/
 	}
 }

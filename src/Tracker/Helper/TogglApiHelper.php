@@ -112,6 +112,26 @@ class TogglApiHelper {
 		}
 	}
 
+	public function times($start_date, $end_date) {
+		$endpoint = '/time_entries?start_date='.urlencode($start_date).'&end_date='.urlencode($end_date);
+
+		$time_items = $this->call($endpoint);
+
+		return $time_items;
+	}
+
+	public function getProjectById($project_id) {
+		$endpoint = '/projects/'.$project_id;
+
+		$project = $this->call($endpoint);
+
+		if(isset($project['data'])) {
+			$project = $project['data'];
+		}
+		
+		return $project;
+	}
+
 	public function importProjects($projects) {
 
 	}
