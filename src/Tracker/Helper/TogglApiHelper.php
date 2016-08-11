@@ -25,7 +25,6 @@ class TogglApiHelper {
 	private function post($endpoint, $data) {
 		// Convert data to json
 		if(is_array($data)) {
-			$data = array('client' => $data);
 			$data = json_encode($data);
 		}
 
@@ -43,19 +42,15 @@ class TogglApiHelper {
 
 		$json_string = curl_exec($ch);
 
-		// var_dump($ch);
-		// 
+		$error_handler = $this->checkErrors($ch, $json_string);
 
-		/* Check here if there are any errors. If its not a 200 chances are something went wrong. We will send an error code back and a friendly message. Which should already be in the code. Otherwise we just send back the decoded array? We could check for an error
-		code variable and if it exists treat it as an error. Ability to skip and carry on since we still want to keep processing.
+		if(isset($error_handler['error_code'])) {
+			return $error_handler;
+		}
 
-		Perhaps this could be stored in some kind or an error array that we can output after the fact? Alternatively a prompt to continue with import?
+		$decoded_json = $error_handler;
 
-		if(!curl_errno($ch)) {
-			// curl_getinfo($ch, CURLINFO_HTTP_CODE)
-		} else {
-			var_dump(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-		} */
+		return $decoded_json;
 	}
 
 	public function me() {
@@ -64,10 +59,6 @@ class TogglApiHelper {
 
 	public function workspaces() {
 		$workspace = $this->call('/workspaces');
-
-		$workspace[1] = $workspace[0];
-
-		$workspace[1]['id'] = 58486759;
 
 		if(count($workspace)) {
 			return $workspace;
@@ -78,9 +69,11 @@ class TogglApiHelper {
 	}
 
 	public function createClient($client_name, $workspace_id) {
-		$data = array('name' => $client_name, 'wid' => intval($workspace_id));
+		$data = array('client' => array('name' => $client_name, 'wid' => intval($workspace_id)));
 
-		$this->post('/clients', $data);
+		$response_data = $this->post('/clients', $data);
+
+		return $response_data;
 	}
 
 	public function importProjects($projects) {
@@ -89,5 +82,20 @@ class TogglApiHelper {
 
 	private function importProject($project) {
 
+	}
+
+	private function checkErrors($ch, $json_string) {
+		// Get the response code
+		if(curl_errno($ch)) {
+			return array('error_code' => '500', 'error_message' => 'Invalid response came back from curl. Please check the command.');
+		}
+
+		switch ($http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
+		    case 200:  # OK
+		    	return json_decode($json_string, TRUE);
+		      	break;
+		    default:
+		    	return array('error_code' => $http_code, 'error_message' => trim($json_string));
+		}
 	}
 }

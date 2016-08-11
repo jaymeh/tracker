@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 use Tracker\Helper\CodebaseApiHelper;
 use Tracker\Helper\TogglApiHelper;
@@ -60,6 +61,8 @@ class ProjectImport extends Command
         	// Ask the question
         	$option_selection = $question_helper->ask($input, $output, $question);
 
+        	$output->writeln('<info>Selected the '.$option_selection.' workspace</info>');
+
         	// Set the id
         	$workspace_id = $this->get_string_between($option_selection);
 
@@ -75,17 +78,23 @@ class ProjectImport extends Command
        	
        	// Loop through the projects
        	foreach($codebase_projects['project'] as $codebase_project) {
-       		$api_caller_toggl->createClient($codebase_project['name'], $workspace_id);
-       		die;
+       		$client_data = $api_caller_toggl->createClient($codebase_project['name'], $workspace_id);
+
+       		$codebase_project['name'];
+
+       		if(isset($client_data['error_code'])) {
+       			$output->writeln('<error>('.$codebase_project['name'].'). '.$client_data['error_message'].'</error>');
+
+       			// Check we have a project with that client. If not create it.
+       		} else {
+       			$output->writeln('Created a new client: '.$codebase_project['name']);
+
+       			// Create project with that client
+
+       			// This could be done by either so we should really check it.
+       		}
        	}
-
-        // $output->writeln('Hello World');
     }
-
-    /* Not required now but may be used in future to create a new workspace
-    private function registerWorkspace() {
-
-    } */
 
     private function get_string_between($string, $start = '{', $end = '}'){
 	    $string = ' ' . $string;
