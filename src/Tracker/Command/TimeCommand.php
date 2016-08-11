@@ -10,6 +10,11 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
+
+use Symfony\Component\Console\Input\InputArgument;
+
 use Tracker\Helper\CodebaseApiHelper;
 use Tracker\Helper\TogglApiHelper;
 
@@ -20,28 +25,39 @@ class TimeCommand extends Command
         $this
             ->setName('time-update')
             ->setDescription('Adds toggl time entries into Codebase')
-            // ->addOption('major', null, InputOption::VALUE_NONE, 'Allow major version update')
+           	->addArgument('dateType', InputArgument::REQUIRED, 'Which date would you like to use? Could be one of the following: (today, yesterday, custom)')
+           	->addOption('startDate', null, InputOption::VALUE_NONE, 'If custom is selected you can input a start date in format dd/mm/yyyy')
+           	->addOption('endDate', null, InputOption::VALUE_NONE, 'If custom is selected you can input a end date in format dd/mm/yyyy')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+    	// In future we might not need this. We could just track if we are using an archived project and use it
+    	// However this could cause more work since some archived projects have the name.
+    	$question_helper = $this->getHelper('question');
+    	$question = new ConfirmationQuestion('Do you wish to also time track archived Projects? (y/n) ', false);
+        $archived = true;
+
+        if (!$question_helper->ask($input, $output, $question)) {
+            $archived = false;
+        }
+
     	$cb_helper = new CodebaseApiHelper();
+    	$projects = $cb_helper->projects($archived);
 
-    	$projects = $cb_helper->projects();
+    	// Request options for time tracking
 
-    	foreach($projects as $project) {
+    	// Loop through projects
+    	/* foreach($projects as $project) {
     		$names[] = $project['name'];
     	}
 
     	sort($names);
     	print_r($names);
 
-    	die;
+    	die; */
 
-    	$project = $cb_helper->getProjectByName('Creode');
-
-    	die;
     	// 
         /* $output->writeln('Looking for updates...');
 

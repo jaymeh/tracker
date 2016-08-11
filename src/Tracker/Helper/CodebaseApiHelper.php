@@ -16,6 +16,7 @@ class CodebaseApiHelper {
 	private function call($endpoint, $options = false) {
 		$ch = curl_init();
 
+		// Might not need this we will see if we should delete it at some point
 		if($options) {
 			$call_url = $this->site_base_url.$endpoint.'?'.$options;
 		} else {
@@ -54,8 +55,9 @@ class CodebaseApiHelper {
 	}
 
 	public function getProjectByName($name) {
-		$project = $this->call('/project', 'name='.$name);
+		$project = $this->call('/'.$name);
 
 		var_dump($project);
+		die;
 	}
 }
