@@ -13,9 +13,16 @@ class CodebaseApiHelper {
 	 * (The final path used for API call e.g. /projects).
 	 * @return array           	Returns a php array of items given back from the api
 	 */
-	private function call($endpoint) {
+	private function call($endpoint, $options = false) {
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $this->site_base_url.$endpoint);
+
+		if($options) {
+			$call_url = $this->site_base_url.$endpoint.'?'.$options;
+		} else {
+			$call_url = $this->site_base_url.$endpoint;
+		}
+
+		curl_setopt($ch, CURLOPT_URL, $call_url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		curl_setopt($ch, CURLOPT_USERPWD, "$this->api_user:$this->api_key");
@@ -30,11 +37,25 @@ class CodebaseApiHelper {
 		return $array;
 	}
 
-	public function projects() {
+	public function projects($include_archived = false) {
 		$projects = $this->call('/projects');
 
 		if(count($projects)) {
-			return $projects;
+			foreach($projects['project'] as $key => $project) {
+				if(!$include_archived) {
+					if($project['status'] == 'archived') {
+						unset($projects['project'][$key]);
+					} 
+				}
+			}
+
+			return $projects['project'];
 		}
+	}
+
+	public function getProjectByName($name) {
+		$project = $this->call('/project', 'name='.$name);
+
+		var_dump($project);
 	}
 }

@@ -38,6 +38,8 @@ class ProjectImport extends Command
         // Set the workspace id by default to the first workspace. This can change if we have more than one.
         $workspace_id = $workspaces[0]['id'];
 
+        $question_helper = $this->getHelper('question');
+
         // Check for the creode workspace
         if(count($workspaces) > 1) {
         	$workspace_names = array();
@@ -48,7 +50,6 @@ class ProjectImport extends Command
         	}
 
         	// Allow user to pick which workspace they want to use
-        	$question_helper = $this->getHelper('question');
         	$question = new ChoiceQuestion(
         		'Please select which project to use',
         		$workspace_names,
@@ -72,12 +73,19 @@ class ProjectImport extends Command
         	}
         }
 
+        $question = new ConfirmationQuestion('Do you wish to import archived Projects? (y/n) ', false);
+        $archived = true;
+
+        if (!$question_helper->ask($input, $output, $question)) {
+            $archived = false;
+        }
+
         // Use the workspace id to create clients and projects
         $cb_helper = new CodebaseApiHelper();
-       	$codebase_projects = $cb_helper->projects();
+       	$codebase_projects = $cb_helper->projects($archived);
        	
        	// Loop through the projects
-       	foreach($codebase_projects['project'] as $codebase_project) {
+       	foreach($codebase_projects as $codebase_project) {
        		$client_data = $api_caller_toggl->createClient($codebase_project['name'], $workspace_id);
 
        		$codebase_project['name'];
@@ -88,8 +96,6 @@ class ProjectImport extends Command
        			// Bit of a pain but would be nice to be able to check and create a project for this if it doesn't exist
        			// This will involve an extra api call in order to fix it.
        		} else {
-       			$output->writeln('Created a new client: '.$codebase_project['name']);
-
        			// Check we have a project with that client. If not create it.
        			$projects = $api_caller_toggl->getProjectByClient($client_data);
 
@@ -116,6 +122,9 @@ class ProjectImport extends Command
        					$output->writeln('<error>Couldn\'t create project: ('.$codebase_project['name'].'). '.$project_response['error_message'].'.</error>');
        				}
        			}
+
+       			// Output to let us know things were successful
+       			$output->writeln('Created a new Client and Project: '.$codebase_project['name']);
        		}
        	}
     }
