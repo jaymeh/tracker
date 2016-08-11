@@ -76,6 +76,42 @@ class TogglApiHelper {
 		return $response_data;
 	}
 
+	public function createProject($project_name, $workspace_id, $client_id, $template_id) {
+		// Call the api and push data
+		// {"project":{"name":"An awesome project","wid":777,"template_id":10237,"is_private":true,"cid":123397}}
+		$endpoint = '/projects';
+
+		$project_data = array(
+			'project' => array(
+				'name' => $project_name,
+				'wid' => $workspace_id,
+				'template_id' => $template_id,
+				'is_private' => false,
+				'cid' => $client_id,
+			),
+		);
+
+		$project_data = json_encode($project_data);
+
+		$project_response = $this->post($endpoint, $project_data);
+
+		return $project_response;
+	}
+
+	public function getProjectByClient($client_id) {
+		$endpoint = '/clients/'.$client_id.'/projects';
+
+		$projects = $this->call($endpoint);
+
+		if(count($projects)) {
+			return $projects;
+		} else {
+			// No Projects found. We could handle an error here but its better to just
+			// send back an empty array so we can check its length
+			return array();
+		}
+	}
+
 	public function importProjects($projects) {
 
 	}

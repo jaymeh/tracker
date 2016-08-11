@@ -83,15 +83,39 @@ class ProjectImport extends Command
        		$codebase_project['name'];
 
        		if(isset($client_data['error_code'])) {
-       			$output->writeln('<error>('.$codebase_project['name'].'). '.$client_data['error_message'].'</error>');
+       			$output->writeln('<error>('.$codebase_project['name'].'). '.$client_data['error_message'].'.</error>');
 
-       			// Check we have a project with that client. If not create it.
+       			// Bit of a pain but would be nice to be able to check and create a project for this if it doesn't exist
+       			// This will involve an extra api call in order to fix it.
        		} else {
        			$output->writeln('Created a new client: '.$codebase_project['name']);
 
-       			// Create project with that client
+       			// Check we have a project with that client. If not create it.
+       			$projects = $api_caller_toggl->getProjectByClient($client_data);
 
-       			// This could be done by either so we should really check it.
+       			$client_id = false;
+
+       			if(isset($client_data['data']['id'])) {
+       				$client_id = $client_data['data']['id'];
+       			}
+
+       			// Check if we have any projects with this client - We could just ignore it here. But maybe
+       			// in future we could check it exists anyway
+       			if(count($projects)) {
+       				/* foreach($projects as $toggl_project) {
+
+       				} */
+       			}
+
+       			// Create project with that client if all data is in order
+       			if(!count($projects) && $client_id !== false) {
+       				// Create our project
+       				$project_response = $api_caller_toggl->createProject($codebase_project['name'], $workspace_id, $client_id, 0);
+
+       				if(isset($project_response['error_code'])) {
+       					$output->writeln('<error>Couldn\'t create project: ('.$codebase_project['name'].'). '.$project_response['error_message'].'.</error>');
+       				}
+       			}
        		}
        	}
     }
