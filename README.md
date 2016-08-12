@@ -1,6 +1,6 @@
-# Cliph
+# Tracker
 
-Example of CLI app in PHP
+Command line Tracker app which specialises in taking times recorded in Toggl and importing them into Codebase using API's
 
 # Install
 
