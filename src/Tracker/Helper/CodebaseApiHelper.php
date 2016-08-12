@@ -84,7 +84,8 @@ class CodebaseApiHelper {
 		*/
 	}
 
-	public function createTimeSession($project, $note, $time, $date = false) {
+	public function createTimeSession($project, $time, $note = '', $date = false) {
+
 		/* 
 		<time-session>
 		  <id type="integer">1234</id>

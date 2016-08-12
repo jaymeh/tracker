@@ -107,23 +107,37 @@ class TimeCommand extends Command
         // Ask which workspace you want to be in
         
 
+        // For now I am omitting the functionality for archived projects. Since we should be able 
+        // to track everything regardless of this.
+        
         // In future we might not need this. We could just track if we are using an archived project and use it
         // However this could cause more work since some archived projects have the name.
-        $question_helper = $this->getHelper('question');
+        /* $question_helper = $this->getHelper('question');
         $question = new ConfirmationQuestion('Do you wish to also time track archived Projects? (y/n) ', false);
         $archived = true;
 
         if (!$question_helper->ask($input, $output, $question)) {
             $archived = false;
-        }
+        } */
 
         // Maybe map project ids from toggl to codebase projects
+        
+        $archived = true;
 
         $cb_helper = new CodebaseApiHelper();
         $projects = $cb_helper->projects($archived);
 
+        $cb_project_data = array();
+
+        foreach($projects as $cb_project) {
+        	if(!isset($cb_project_data[$cb_project['name']])) {
+        		$cb_project_data[$cb_project['name']] = $cb_project;
+        	}
+        }
+
         $toggl_helper = new TogglApiHelper();
         $times = $toggl_helper->times($start_date_formatted, $end_date_formatted);
+
         $projects = '';
 
         $errors[] = array();
@@ -131,10 +145,32 @@ class TimeCommand extends Command
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
             $project_id = $time_entry['pid'];
-
             $project = $toggl_helper->getProjectById($project_id);
 
-            var_dump($project['name']);
+            $cb_project_item = $cb_project_data[$project['name']];
+
+            // Check for the touch with a ticket id and use it somehow.
+
+            if($cb_project_item) {
+            	// We have a match and time entry lets push them up :)
+            	$project_link  = $cb_project_item['permalink'];
+
+            	$start_date = new \DateTime($time_entry['start']);
+            	$start_date->setTimeZone(new \DateTimeZone('Europe/London'));
+
+            	$end_date = new \DateTime($time_entry['stop']);
+            	$end_date->setTimeZone(new \DateTimeZone('Europe/London'));
+
+            	$start_time = '';
+            	$end_time = '';
+
+            	$time = array('duration' => $time_entry['duration'], 'start' => $time_entry['start'], 'stop' => $time_entry['stop']);
+            	// $note = 
+            }
+
+
+
+            // var_dump($cb_project_data);
 
             // var_dump($project['name']);
 
