@@ -11,4 +11,16 @@ class FormatHelper {
     	$len = strpos($string, $end, $ini) - $ini;
 	    return substr($string, $ini, $len);
 	}
+
+	public function delete_all_between($string, $start, $end) {
+	  $startPos = strpos($string, $start);
+	  $endPos = strpos($string, $end);
+	  if ($startPos === false || $endPos === false) {
+	    return $string;
+	  }
+
+	  $textToDelete = substr($string, $startPos, ($endPos + strlen($end)) - $startPos);
+
+	  return str_replace($textToDelete, '', $string);
+	}
 }

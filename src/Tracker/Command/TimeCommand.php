@@ -66,20 +66,19 @@ class TimeCommand extends Command
                 $end_date->setTimezone(new \DateTimeZone('Europe/London'));
                 $end_date->setTime(23, 59, 59);
                 $end_date_formatted = $end_date->format(\DateTime::ATOM);
-
-                // Get end of day
                 break;
             case 'custom':
                 // Get start date from option
                 $inputted_start = $input->getArgument('Start Date');
-
                 $start_date_check = strtotime($inputted_start);
 
+                // Check that we have a valid start date
                 if(!$start_date_check) {
                     $output->writeln('<error>Custom start date given in incorrect format. Please ensure it is in (dd/mm/yyyy).</error>');
                     return;
                 }
 
+                // Format the date how we need it for the api call
                 $start_date = new \DateTime();
                 $start_date->setTimezone(new \DateTimeZone('Europe/London'));
                 $start_date->setTimestamp($start_date_check);
@@ -89,11 +88,13 @@ class TimeCommand extends Command
                 $inputted_end = $input->getArgument('End Date');
                 $end_date_check = strtotime($inputted_end);
 
+                // Check that we have a valid end date
                 if(!$end_date_check) {
                     $output->writeln('<error>Custom end date given in incorrect format. Please ensure it is in (dd/mm/yyyy).</error>');
                     return;
                 }
 
+                // Format the date how we need it for the api call
                 $end_date = new \DateTime();
                 $end_date->setTimezone(new \DateTimeZone('Europe/London'));
                 $end_date->setTimestamp($end_date_check);
@@ -138,15 +139,17 @@ class TimeCommand extends Command
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
             if(!isset($time_entry['pid'])) {
-                // No project. Skip this
-                $errors[] = 'Could not find project attached to time entry: '.$time_entry['description'];
+                // Can't find the project from toggl
+                $errors[] = 'Could not find toggl project attached to time entry: '.$time_entry['description'];
                 continue;
             }
 
             $project = $toggl_helper->getProjectById($time_entry['pid']);
 
             if(!$project) {
-
+                // Report project error
+                $errors[] = 'Could not find codebase project attached to time entry: '.$time_entry['description'];
+                continue;
             }
 
             // If we don't have a project item with name skip it.
@@ -165,22 +168,15 @@ class TimeCommand extends Command
             	// We have a match and time entry lets push them up :)
             	$project_link  = $cb_project_item['permalink'];
 
-            	$start_date = new \DateTime($time_entry['start']);
-            	$start_date->setTimeZone(new \DateTimeZone('Europe/London'));
-
                 // Add to email report that we don't have stop time
                 if(!isset($time_entry['stop'])) {
                     continue;
                 }
 
-            	$end_date = new \DateTime($time_entry['stop']);
-            	$end_date->setTimeZone(new \DateTimeZone('Europe/London'));
-
-            	$start_time = '';
-            	$end_time = '';
-
+                // Setup time
             	$time = array('duration' => $time_entry['duration'], 'start' => $time_entry['start'], 'stop' => $time_entry['stop']);
 
+                // Try to get a ticket id from the time entry
                 $format_helper = new FormatHelper();
                 $ticket_string = $format_helper->get_string_between($note, '[', ']');
 
@@ -190,22 +186,26 @@ class TimeCommand extends Command
                    $ticket_id = $cb_helper->checkTicketId($ticket_string); 
                 }
 
+                // Get the duration to output. This is because toggl returns it
+                // in seconds so we convert it to minutes.
+                $duration = $time['duration'] / 60;
+
                 if($ticket_id) {
                     // Log the ticket
                    $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
 
                    // Strip out the touch for the description in future
-                   
-                   $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.$time_entry['description'].'" '.$duration.' minutes</info>');
+                   $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
+
+                   // Output something to help see whats happening
+                   $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.trim($stripped_duration).'" '.$duration.' minutes</info>');
                     continue;
                 }
 
                 // Log the time entry
-                // Skip log entry
                 $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
 
-                $duration = $time['duration'] / 60;
-
+                // Output something to help see whats happening
                 $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.$duration.' minutes</info>');
             }
         }
