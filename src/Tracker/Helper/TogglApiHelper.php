@@ -131,15 +131,7 @@ class TogglApiHelper {
 		
 		return $project;
 	}
-
-	public function importProjects($projects) {
-
-	}
-
-	private function importProject($project) {
-
-	}
-
+	
 	private function checkErrors($ch, $json_string) {
 		// Get the response code
 		if(curl_errno($ch)) {

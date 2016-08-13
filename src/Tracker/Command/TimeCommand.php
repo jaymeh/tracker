@@ -17,11 +17,13 @@ use Symfony\Component\Console\Input\InputArgument;
 
 use Tracker\Helper\CodebaseApiHelper;
 use Tracker\Helper\TogglApiHelper;
+use Tracker\Helper\FormatHelper;
 
 class TimeCommand extends Command
 {
     protected function configure()
     {
+        // Setup the command arguments
         $this
             ->setName('time-update')
             ->setDescription('Adds toggl time entries into Codebase')
@@ -33,11 +35,13 @@ class TimeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // Set default timezone so we don't have some weird time issues.
         date_default_timezone_set('Europe/London');
 
         // Figure out which date type we are using
         $date_type = $input->getArgument('Date Type');
 
+        // Check the day
         switch($date_type) {
             case 'today':
                 // Get start of day
@@ -103,53 +107,59 @@ class TimeCommand extends Command
                 return;
                 break;
         }
-
-        // Ask which workspace you want to be in
         
-
-        // For now I am omitting the functionality for archived projects. Since we should be able 
-        // to track everything regardless of this.
-        
-        // In future we might not need this. We could just track if we are using an archived project and use it
-        // However this could cause more work since some archived projects have the name.
-        /* $question_helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('Do you wish to also time track archived Projects? (y/n) ', false);
+        // Force archived projects since if we have tracked time on it we should know
         $archived = true;
 
-        if (!$question_helper->ask($input, $output, $question)) {
-            $archived = false;
-        } */
-
-        // Maybe map project ids from toggl to codebase projects
-        
-        $archived = true;
-
+        // Load in projects
         $cb_helper = new CodebaseApiHelper();
         $projects = $cb_helper->projects($archived);
 
+        // Setup placeholder for project data
         $cb_project_data = array();
 
+        // Put data into another array in a format that helps us
+        // reduce the api calls we are making
         foreach($projects as $cb_project) {
         	if(!isset($cb_project_data[$cb_project['name']])) {
         		$cb_project_data[$cb_project['name']] = $cb_project;
         	}
         }
 
+        // Load in the toggl helper and get all time entries based
+        // on the given dates
         $toggl_helper = new TogglApiHelper();
         $times = $toggl_helper->times($start_date_formatted, $end_date_formatted);
 
         $projects = '';
-
-        $errors[] = array();
+        $errors = array();
+        $status = array();
 
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
-            $project_id = $time_entry['pid'];
-            $project = $toggl_helper->getProjectById($project_id);
+            if(!isset($time_entry['pid'])) {
+                // No project. Skip this
+                $errors[] = 'Could not find project attached to time entry: '.$time_entry['description'];
+                continue;
+            }
 
+            $project = $toggl_helper->getProjectById($time_entry['pid']);
+
+            if(!$project) {
+                
+            }
+
+            // If we don't have a project item with name skip it.
+            // Maybe in future we can email a report of this.
+            if(!isset($cb_project_data[$project['name']])) {
+                continue;
+            }
+
+            // Get project item based on the project from Toggl
             $cb_project_item = $cb_project_data[$project['name']];
 
             // Check for the touch with a ticket id and use it somehow.
+            $note = $time_entry['description'];
 
             if($cb_project_item) {
             	// We have a match and time entry lets push them up :)
@@ -158,6 +168,11 @@ class TimeCommand extends Command
             	$start_date = new \DateTime($time_entry['start']);
             	$start_date->setTimeZone(new \DateTimeZone('Europe/London'));
 
+                // Add to email report that we don't have stop time
+                if(!isset($time_entry['stop'])) {
+                    continue;
+                }
+
             	$end_date = new \DateTime($time_entry['stop']);
             	$end_date->setTimeZone(new \DateTimeZone('Europe/London'));
 
@@ -165,53 +180,25 @@ class TimeCommand extends Command
             	$end_time = '';
 
             	$time = array('duration' => $time_entry['duration'], 'start' => $time_entry['start'], 'stop' => $time_entry['stop']);
-            	// $note = 
+
+                $ticket_string = $format_helper->get_string_between($note, '[', ']');
+
+                $ticket_id = false;
+
+                if($ticket_string !== false) {
+                   $ticket_id = $cb_helper->checkTicketId($ticket_string); 
+                }
+
+                if($ticket_id) {
+                    // Log the ticket
+                   $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
+                    continue;
+                }
+
+                // Log the time entry
+                // Skip log entry
+                $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
             }
-
-
-
-            // var_dump($cb_project_data);
-
-            // var_dump($project['name']);
-
-            // Get project for time entry.
-
         }
-
-        // Based on this choose whether to take in start and end dates
-
-        // Get all of our times based on input variables
-
-    	// Request options for time tracking
-
-    	// Loop through projects
-    	/* foreach($projects as $project) {
-    		$names[] = $project['name'];
-    	}
-
-    	sort($names);
-    	print_r($names);
-
-    	die; */
-
-    	// 
-        /* $output->writeln('Looking for updates...');
-
-        try {
-            $manager = new Manager(Manifest::loadFile(self::MANIFEST_FILE));
-        } catch (FileException $e) {
-            $output->writeln('<error>Unable to search for updates</error>');
-
-            return 1;
-        }
-
-        $currentVersion = $this->getApplication()->getVersion();
-        $allowMajor = $input->getOption('major');
-
-        if ($manager->update($currentVersion, $allowMajor)) {
-            $output->writeln('<info>Updated to latest version</info>');
-        } else {
-            $output->writeln('<comment>Already up-to-date</comment>');
-        } */
     }
 }

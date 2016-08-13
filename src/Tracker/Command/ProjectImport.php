@@ -11,7 +11,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 use Tracker\Helper\CodebaseApiHelper;
 use Tracker\Helper\TogglApiHelper;
-
+use Tracker\Helper\FormatHelper;
 
 class ProjectImport extends Command
 {
@@ -65,7 +65,8 @@ class ProjectImport extends Command
         	$output->writeln('<info>Selected the '.$option_selection.' workspace</info>');
 
         	// Set the id
-        	$workspace_id = $this->get_string_between($option_selection);
+          $format_helper = new FormatHelper();
+        	$workspace_id = $format_helper->get_string_between($option_selection);
 
         	// Check the id and if there isn't one then set an error
         	if($workspace_id == false) {
@@ -128,13 +129,4 @@ class ProjectImport extends Command
        		}
        	}
     }
-
-    private function get_string_between($string, $start = '{', $end = '}'){
-	    $string = ' ' . $string;
-	    $ini = strpos($string, $start);
-	    if ($ini == 0) { return false; }
-	    $ini += strlen($start);
-	    $len = strpos($string, $end, $ini) - $ini;
-	    return substr($string, $ini, $len);
-	}
 }

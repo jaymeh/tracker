@@ -38,6 +38,28 @@ class CodebaseApiHelper {
 		return $array;
 	}
 
+	private function post($endpoint, $data) {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $this->site_base_url.$endpoint);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_setopt($ch, CURLOPT_USERPWD, $this->api_user.':'.$this->api_key);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    		'Content-Type: application/xml',
+    	));
+
+		$xml_data = curl_exec($ch);
+
+		$xml = simplexml_load_string($xml_data);
+		$json = json_encode($xml);
+		$array = json_decode($json,TRUE);
+
+		return $array;
+	}
+
 	public function projects($include_archived = false) {
 		$projects = $this->call('/projects');
 
@@ -62,30 +84,52 @@ class CodebaseApiHelper {
 		}
 	}
 
-	public function updateTicketTime($project, $ticket_id, $time) {
-		// (/project/tickets/ticket_id/notes)
-		/* 
-		<ticket-note>
-		    <content>Updating the Status</content>
-		    <time-added>46</time-added>
-		    <changes>
-		        <status-id>{NEW_ID}</status-id>
-		        <priority-id>{NEW_ID}</priority-id>
-		        <category-id>{NEW_ID}</category-id>
-		        <assignee-id></assignee-id>
-		        <milestone-id></milestone-id>
-		        <summary>A new summary</summary>
-		    </changes>
-		    <upload-tokens type="array">
-		      <upload-token>c2959f1c-0297-0af7-4e52-ed0bc3e2fb02</upload-token>
-		    </upload-tokens>
-		    <private>1</private>
-		</ticket-note>
-		*/
-	}
+	public function createTimeSession($project, $time, $note, $ticket_id = false) {
+		$endpoint = '/'.$project.'/time_sessions';
 
-	public function createTimeSession($project, $time, $note = '', $date = false) {
+		$xml_data = new \SimpleXMLElement('<?xml version="1.0"?><time-session></time-session>');
 
+		$data_array = array();
+
+		if(!isset($time['start'])) {
+			return false;
+		}
+
+		if(!$start_timestamp = strtotime($time['start'])) {
+			return false;
+		}
+
+		if(!isset($time['duration'])) {
+			return false;
+		}
+
+		$data_array['minutes'] = $time['duration'] / 60;
+		
+		if($note !== false) {
+			$data_array['summary'] = $note;
+		}
+
+		$data_array['session-date'] = date('Y-m-d', $start_timestamp);
+
+		if($ticket_id !== false) {
+			$data_array['ticket-id'] = $ticket_id;
+			unset($data_array['summary']);
+		}
+
+		$data_array = array_flip($data_array);
+
+		if($data_array == NULL) {
+			return false;
+		}
+
+		array_walk_recursive($data_array, array ($xml_data, 'addChild'));
+
+		$post_data = $xml_data->asXML();
+
+		$posted = $this->post($endpoint, $post_data);
+
+		return $posted;
+		// (/project/time_sessions)
 		/* 
 		<time-session>
 		  <id type="integer">1234</id>
@@ -97,5 +141,15 @@ class CodebaseApiHelper {
 		  <updated-at type="datetime">2013-09-10T18:45:44Z</updated-at>
 		</time-session>
 		*/
+	}
+
+	public function checkTicketId($ticket_string) {
+		// Just strip touch out. In future I will put something in here
+		// to grab it as a json string and parse it.
+		$ticket_id = str_replace('touch:', '', $ticket_string);
+		$ticket_id = trim($ticket_id);
+		$ticket_id = intval($ticket_id);
+
+		return $ticket_id;
 	}
 }
