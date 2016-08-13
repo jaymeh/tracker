@@ -146,7 +146,7 @@ class TimeCommand extends Command
             $project = $toggl_helper->getProjectById($time_entry['pid']);
 
             if(!$project) {
-                
+
             }
 
             // If we don't have a project item with name skip it.
@@ -181,6 +181,7 @@ class TimeCommand extends Command
 
             	$time = array('duration' => $time_entry['duration'], 'start' => $time_entry['start'], 'stop' => $time_entry['stop']);
 
+                $format_helper = new FormatHelper();
                 $ticket_string = $format_helper->get_string_between($note, '[', ']');
 
                 $ticket_id = false;
@@ -192,12 +193,20 @@ class TimeCommand extends Command
                 if($ticket_id) {
                     // Log the ticket
                    $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
+
+                   // Strip out the touch for the description in future
+                   
+                   $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.$time_entry['description'].'" '.$duration.' minutes</info>');
                     continue;
                 }
 
                 // Log the time entry
                 // Skip log entry
                 $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
+
+                $duration = $time['duration'] / 60;
+
+                $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.$duration.' minutes</info>');
             }
         }
     }
