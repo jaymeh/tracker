@@ -103,7 +103,7 @@ class CodebaseApiHelper {
 			return false;
 		}
 
-		$data_array['minutes'] = $time['duration'] / 60;
+		$data_array['minutes'] = intval(round($time['duration'] / 60));
 		
 		if($note !== false) {
 			$data_array['summary'] = $note;
@@ -129,18 +129,6 @@ class CodebaseApiHelper {
 		$posted = $this->post($endpoint, $post_data);
 
 		return $posted;
-		// (/project/time_sessions)
-		/* 
-		<time-session>
-		  <id type="integer">1234</id>
-		  <summary>Worked on the awesome time tracking in Codebase</summary>
-		  <minutes type="integer">180</minutes>
-		  <session-date type="date">2009-09-05</session-date>
-		  <user-id type="integer">1234</user-id>
-		  <created-at type="datetime">2013-09-10T18:45:44Z</created-at>
-		  <updated-at type="datetime">2013-09-10T18:45:44Z</updated-at>
-		</time-session>
-		*/
 	}
 
 	public function checkTicketId($ticket_string) {

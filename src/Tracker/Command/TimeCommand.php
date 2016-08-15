@@ -198,7 +198,7 @@ class TimeCommand extends Command
                    $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
 
                    // Output something to help see whats happening
-                   $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.trim($stripped_duration).'" '.$duration.' minutes</info>');
+                   $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
                     continue;
                 }
 
@@ -206,7 +206,7 @@ class TimeCommand extends Command
                 $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
 
                 // Output something to help see whats happening
-                $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.$duration.' minutes</info>');
+                $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
             }
         }
     }
