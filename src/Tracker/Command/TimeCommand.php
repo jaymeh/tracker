@@ -19,6 +19,9 @@ use Tracker\Helper\CodebaseApiHelper;
 use Tracker\Helper\TogglApiHelper;
 use Tracker\Helper\FormatHelper;
 
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseException;
+
 class TimeCommand extends Command
 {
     protected function configure()
@@ -114,6 +117,14 @@ class TimeCommand extends Command
 
         // Load in projects
         $cb_helper = new CodebaseApiHelper();
+        $config_data = $cb_helper->get_config_data();
+
+        if($config_data !== true) {
+        	$output->writeln('<error>'.$config_data.'</error>');
+        	return;
+        }
+
+
         $projects = $cb_helper->projects($archived);
 
         // Setup placeholder for project data
@@ -130,6 +141,17 @@ class TimeCommand extends Command
         // Load in the toggl helper and get all time entries based
         // on the given dates
         $toggl_helper = new TogglApiHelper();
+        $toggl_config_data = $toggl_helper->get_config_data();
+
+        if($toggl_config_data !== true) {
+        	$output->writeln('<error>'.$toggl_config_data.'</error>');
+        	return;
+        }
+
+        var_dump($toggl_helper->api_key);
+
+        die;
+
         $times = $toggl_helper->times($start_date_formatted, $end_date_formatted);
 
         $projects = '';

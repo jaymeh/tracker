@@ -2,9 +2,10 @@
 
 namespace Tracker\Helper;
 
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseException;
+
 class CodebaseApiHelper {
-	private $api_user = 'creode/jamie-sykes-30';
-	private $api_key = 'b9114c3c026dc58212e8e8a44a8c05dc5fcf0f9f';
 	private $site_base_url = 'https://api3.codebasehq.com';
 
 	/**
@@ -139,5 +140,44 @@ class CodebaseApiHelper {
 		$ticket_id = intval($ticket_id);
 
 		return $ticket_id;
+	}
+
+	public function get_config_data() {
+		$user = exec('whoami');
+
+		$directory = '/Users/'.$user.'/.tracker/';
+
+		if(!file_exists($directory)) {
+    		// Try to create directory
+	    	$directory_create = mkdir($directory, 0777, true);
+
+	    	if(!$directory_create) {
+	    		$error = 'Failed to create directory inside: '.$directory.'. Please check this is writeable by: '.$user;
+	    		return $error;
+	    	}
+    	}
+
+    	$file = $directory.'config.yml';
+
+    	$error = false;
+
+    	try {
+		    $value = Yaml::parse(file_get_contents($file));
+		} catch (ParseException $e) {
+		    $error = printf("Unable to parse the YAML string: %s", $e->getMessage());
+		}
+
+		if(!$error) {
+			if(!isset($value) || !is_array($value)) {
+				return 'Cannot parse config file. Please check that this has been created.';
+			}
+
+			$this->api_user = $value['cb_api_user']; // Codebase api username
+			$this->api_key = $value['cb_api_key']; // Codebase api key
+
+			return true;
+		}
+
+		return $error;
 	}
 }

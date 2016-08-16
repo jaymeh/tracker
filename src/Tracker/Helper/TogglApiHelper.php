@@ -2,8 +2,10 @@
 
 namespace Tracker\Helper;
 
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseException;
+
 class TogglApiHelper {
-	private $api_key = '8c5147af10d78d87f033d709a2b9f234';
 	private $site_base_url = 'https://www.toggl.com/api/v8';
 	private $toggl_workspace_id = '';
 
@@ -145,5 +147,38 @@ class TogglApiHelper {
 		    default:
 		    	return array('error_code' => $http_code, 'error_message' => trim($json_string));
 		}
+	}
+
+	public function get_config_data() {
+		$user = exec('whoami');
+
+		$directory = '/Users/'.$user.'/.tracker/';
+
+		if(!file_exists($directory)) {
+    		// Try to create directory
+	    	$error = 'Failed to find directory: '.$directory.'. Please create this using the configure command';
+    	}
+
+    	$file = $directory.'config.yml';
+
+    	$error = false;
+
+    	try {
+		    $value = Yaml::parse(file_get_contents($file));
+		} catch (ParseException $e) {
+		    $error = printf("Unable to parse the YAML string: %s", $e->getMessage());
+		}
+
+		if(!$error) {
+			if(!isset($value) || !is_array($value)) {
+				return 'Cannot parse config file. Please check that this has been created.';
+			}
+
+			$this->api_key = $value['toggl_api_key']; // Codebase api key
+
+			return true;
+		}
+
+		return $error;
 	}
 }
