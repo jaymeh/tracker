@@ -148,10 +148,6 @@ class TimeCommand extends Command
         	return;
         }
 
-        var_dump($toggl_helper->api_key);
-
-        die;
-
         $times = $toggl_helper->times($start_date_formatted, $end_date_formatted);
 
         $projects = '';
