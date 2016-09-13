@@ -8,6 +8,10 @@ use Symfony\Component\Yaml\Exception\ParseException;
 class CodebaseApiHelper {
 	private $site_base_url = 'https://api3.codebasehq.com';
 
+	function __construct() {
+		$this->get_config_data();
+	}
+
 	/**
 	 * Calls the api
 	 * @param  string $endpoint The endpoint of the api containing a trailing slash.
