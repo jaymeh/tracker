@@ -151,7 +151,10 @@ class TimeCommand extends Command
         $errors = array();
         $status = array();
 
-        // Take the times given and loop through them.
+        var_dump($times);
+        die;
+
+        /* // Take the times given and loop through them.
         foreach($times as $time_entry) {
             if(!isset($time_entry['pid'])) {
                 // Can't find the project from toggl
@@ -223,6 +226,6 @@ class TimeCommand extends Command
                 // Output something to help see whats happening
                 $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
             }
-        }
+        } */
     }
 }

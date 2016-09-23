@@ -36,6 +36,10 @@ class CodebaseApiHelper {
 
 		$xml_data = curl_exec($ch);
 
+		// Build some kind of error handling here.
+		var_dump($xml_data);
+		die;
+
 		$xml = simplexml_load_string($xml_data);
 		$json = json_encode($xml);
 		$array = json_decode($json,TRUE);
