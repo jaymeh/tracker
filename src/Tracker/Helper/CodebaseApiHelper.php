@@ -35,10 +35,12 @@ class CodebaseApiHelper {
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 		$xml_data = curl_exec($ch);
+		$response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-		// Build some kind of error handling here.
-		var_dump($xml_data);
-		die;
+		if($response !== 200) {
+			$error = trim($xml_data);
+			return $error;
+		}
 
 		$xml = simplexml_load_string($xml_data);
 		$json = json_encode($xml);
@@ -72,6 +74,10 @@ class CodebaseApiHelper {
 	public function projects($include_archived = false) {
 		$projects = $this->call('/projects');
 
+		if(!is_array($projects)) {
+			return $projects;
+		}
+
 		if(count($projects)) {
 			foreach($projects['project'] as $key => $project) {
 				if(!$include_archived) {
@@ -87,6 +93,10 @@ class CodebaseApiHelper {
 
 	public function getProjectByName($name) {
 		$project = $this->call('/'.$name);
+
+		if(!is_array($project)) {
+			return $project;
+		}
 
 		if(count($project)) {	
 			return $project;

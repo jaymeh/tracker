@@ -124,6 +124,16 @@ class TimeCommand extends Command
 
         $projects = $cb_helper->projects($archived);
 
+        if(!is_array($codebase_projects)) {
+            if($projects == 'HTTP Basic: Access denied.') {
+                $output->writeln('<error>Invalid API credentials provided. Please check them in your config file or re-run configure command.</error>');
+                return 500;
+            } else {
+                $output->writeln('<error>'.$projects.'</error>');
+                return 500;
+            }
+        }
+
         // Setup placeholder for project data
         $cb_project_data = array();
 

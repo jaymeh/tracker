@@ -23,6 +23,13 @@ class TogglApiHelper {
 
 		$json_string = curl_exec($ch);
 
+		$response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+		if($response !== 200) {
+			$error = trim($xml_data);
+			return $error;
+		}
+
 		$array = json_decode($json_string,TRUE);
 
 		return $array;
@@ -59,12 +66,12 @@ class TogglApiHelper {
 		return $decoded_json;
 	}
 
-	public function me() {
-		$me = $this->call('me');
-	}
-
 	public function workspaces() {
 		$workspace = $this->call('/workspaces');
+
+		if(!is_array($workspace)) {
+			return $workspace;
+		}
 
 		if(count($workspace)) {
 			return $workspace;
@@ -108,6 +115,10 @@ class TogglApiHelper {
 		$endpoint = '/clients/'.$client_id.'/projects';
 
 		$projects = $this->call($endpoint);
+
+		if(!is_array($projects)) {
+			return $projects;
+		}
 
 		if(count($projects)) {
 			return $projects;

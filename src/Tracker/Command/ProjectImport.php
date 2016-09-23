@@ -29,6 +29,12 @@ class ProjectImport extends Command
         $api_caller_toggl = new TogglApiHelper();
         $workspaces = $api_caller_toggl->workspaces();
 
+        // If we have a string it must be an error throw it
+        if(!is_array($workspaces)) {
+          $output->writeln('<error>'.$workspaces.'</error>');
+          return 500;
+        }
+
         // If we don't have any throw an error
         if(empty($workspaces)) {
         	$output->writeln('<error>Couldn\'t find a workspace to use when importing projects. Please check your toggl api key is correct.</error>');
@@ -84,6 +90,11 @@ class ProjectImport extends Command
         // Use the workspace id to create clients and projects
         $cb_helper = new CodebaseApiHelper();
        	$codebase_projects = $cb_helper->projects($archived);
+
+        if(!is_array($codebase_projects)) {
+          $output->writeln('<error>'.$codebase_projects.'</error>');
+          return 500;
+        }
        	
        	// Loop through the projects
        	foreach($codebase_projects as $codebase_project) {
@@ -99,6 +110,12 @@ class ProjectImport extends Command
        		} else {
        			// Check we have a project with that client. If not create it.
        			$projects = $api_caller_toggl->getProjectByClient($client_data);
+
+            if(!is_array($projects)) {
+              // If we have a string it must be an error throw it
+              $output->writeln('<error>'.$projects.'</error>');
+              return 500;
+            }
 
        			$client_id = false;
 
