@@ -124,7 +124,7 @@ class TimeCommand extends Command
 
         $projects = $cb_helper->projects($archived);
 
-        if(!is_array($codebase_projects)) {
+        if(!is_array($projects)) {
             if($projects == 'HTTP Basic: Access denied.') {
                 $output->writeln('<error>Invalid API credentials provided. Please check them in your config file or re-run configure command.</error>');
                 return 500;
@@ -160,6 +160,9 @@ class TimeCommand extends Command
         $projects = '';
         $errors = array();
         $status = array();
+
+        /* Combine time entries based on project, date and description */
+        $todays_date = date('d/m/Y');
 
         var_dump($times);
         die;
