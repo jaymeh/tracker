@@ -111,7 +111,7 @@ class ProjectImport extends Command
        			// Check we have a project with that client. If not create it.
        			$projects = $api_caller_toggl->getProjectByClient($client_data);
 
-            if(!is_array($projects)) {
+            if(!is_array($projects) && $projects !== "") {
               // If we have a string it must be an error throw it
               $output->writeln('<error>'.$projects.'</error>');
               return 500;
@@ -123,11 +123,12 @@ class ProjectImport extends Command
        				$client_id = $client_data['data']['id'];
        			}
 
-       			// Check if we have any projects with this client - We could just ignore it here. But maybe
+       			// Check if we have any projects with this client - We could
+            // just ignore it here as API checks this. But maybe
        			// in future we could check it exists anyway
        			if(count($projects)) {
        				/* foreach($projects as $toggl_project) {
-
+                
        				} */
        			}
 
