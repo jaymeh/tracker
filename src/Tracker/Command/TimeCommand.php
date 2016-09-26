@@ -207,7 +207,7 @@ class TimeCommand extends Command
         foreach($times as $time_entry) {
             if(!isset($time_entry['pid'])) {
                 // Can't find the project from toggl
-                $errors[] = 'Could not find toggl project attached to time entry: '.$time_entry['description'];
+                $output->writeln('<error>Could not find toggl project attached to time entry: '.$time_entry['description'].'</error>');
                 continue;
             }
 
@@ -215,7 +215,7 @@ class TimeCommand extends Command
 
             if(!$project) {
                 // Report project error
-                $errors[] = 'Could not find codebase project attached to time entry: '.$time_entry['description'];
+                $output->writeln('<error>Could not find codebase project attached to time entry: '.$time_entry['description'].'</error>');
                 continue;
             }
 
