@@ -147,7 +147,7 @@ class ProjectImport extends Command
        			}
 
        			// Output to let us know things were successful
-       			$output->writeln('Created a new Client and Project: '.$codebase_project['name']);
+       			$output->writeln('<info>Created a new Client and Project: '.$codebase_project['name'].'</info>');
        		}
        	}
     }
