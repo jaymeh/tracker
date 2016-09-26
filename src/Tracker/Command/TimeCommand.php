@@ -70,6 +70,8 @@ class TimeCommand extends Command
             case 'custom':
                 // Get start date from option
                 $inputted_start = $input->getArgument('Start Date');
+                $inputted_start = str_replace('/', '-', $inputted_start);
+
                 $start_date_check = strtotime($inputted_start);
 
                 // Check that we have a valid start date
@@ -86,6 +88,7 @@ class TimeCommand extends Command
 
                 // Get end date from option
                 $inputted_end = $input->getArgument('End Date');
+                $inputted_end = str_replace('/', '-', $inputted_end);
                 $end_date_check = strtotime($inputted_end);
 
                 // Check that we have a valid end date
@@ -162,12 +165,45 @@ class TimeCommand extends Command
         $status = array();
 
         /* Combine time entries based on project, date and description */
-        $todays_date = date('d/m/Y');
+        $times_temp = $times;
 
-        var_dump($times);
-        die;
+        foreach($times as $key => $time_entry) {
+            // Setup current times variables
+            $id = $time_entry['id'];
+            $start_date_timestamp = strtotime($time_entry['start']);
+            $start_formatted = date('d/m/Y', $start_date_timestamp);
 
-        /* // Take the times given and loop through them.
+            $end_date_timestamp = strtotime($time_entry['stop']);
+            $end_formatted = date('d/m/Y', $end_date_timestamp);
+
+            $description = $time_entry['description'];
+            $project = $time_entry['pid'];
+
+            // Loop through each time entry checking for the duplicates
+            foreach($times_temp as $new_key => $time_new) {
+                if($id !== $time_new['id']) {
+                    $time_new_start_timestamp = strtotime($time_new['start']);
+                    $time_new_start_formatted = date('d/m/Y', $time_new_start_timestamp);
+
+                    $time_new_end_timestamp = strtotime($time_new['start']);
+                    $time_new_end_formatted = date('d/m/Y', $time_new_end_timestamp);
+                    
+                    // Check if the project, start date, end date and description match each other. If they do then condense the entry down
+                    if($time_new_start_formatted == $start_formatted &&
+                        $time_new_end_formatted == $end_formatted &&
+                        $description == $time_new['description'] &&
+                        $project == $time_new['pid']) {
+
+                        if($times[$key]) {
+                            $times[$key]['duration'] += $time_new['duration'];
+                            unset($times[$new_key]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Take the times given and loop through them.
         foreach($times as $time_entry) {
             if(!isset($time_entry['pid'])) {
                 // Can't find the project from toggl
@@ -239,6 +275,6 @@ class TimeCommand extends Command
                 // Output something to help see whats happening
                 $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
             }
-        } */
+        }
     }
 }
