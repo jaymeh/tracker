@@ -75,10 +75,6 @@ class CodebaseApiHelper {
 			return $projects;
 		}
 
-		// var_dump($projects);
-
-		var_dump($projects);
-
 		if(count($projects)) {
 			foreach($projects as $key => $project) {
 				if(!$include_archived) {
@@ -200,9 +196,58 @@ class CodebaseApiHelper {
 		return $error;
 	}
 
-	function getTimeSessions($project, $dateFrom, $dateTo) {
-		$time_sessions = $this->call('/'.$project.'/time_sessions?from='.$dateFrom.'&to='.$dateTo);
+	public function getTimeSessions($project, $dateFrom, $dateTo) {
+		$dateFromFormatted = $dateFrom->format('Y-m-d');
+		$dateToFormatted = $dateTo->format('Y-m-d');
 
-		var_dump($time_sessions);
+		$today = date('Y-m-d');
+
+		$users = $this->getProjectAssignments($project);
+
+		$current_user_id = false;
+
+		foreach($users as $user) {
+			if($user['username'] == $this->api_user) {
+				$current_user_id = $user['id'];
+			}
+		}
+
+		// Today was used
+		if($today == $dateFromFormatted && $today == $dateToFormatted) {
+			$time_string = '/'.$project.'/time_sessions/day?user-id='.$current_user_id;
+		// Yesterday was used
+		} else if($dateFromFormatted == $dateToFormatted) {
+			$time_string = '/'.$project.'/time_sessions?from='.$dateToFormatted;
+		// Custom date was used
+		} else {
+			/* $modifiedTo = clone $dateTo;
+			$modifiedTo->modify('+1 days');
+			$modifiedFrom = clone $dateFrom;
+			$modifiedFrom->modify('-1 day');
+			$dateFromFormatted = $modifiedFrom->format('Y-m-d');
+			$dateToFormatted = $modifiedTo->format('Y-m-d');
+
+			$time_string = '/'.$project.'/time_sessions?to='.$dateToFormatted.'&from='.$dateToFormatted; */
+		}
+
+		$time_sessions = $this->call($time_string);
+
+		//var_dump($time_sessions);
+	}
+
+	public function getProjectAssignments($project) {
+		$assignments = array();
+		$final_assignments = array();
+
+		$assignments = $this->call('/'.$project.'/assignments');
+
+		if(count($assignments)) {
+			foreach($assignments as $assignment) {
+				$assignment = $assignment['user'];
+				$final_assignments[$assignment['id']] = $assignment;
+			}
+		}
+
+		return $final_assignments;
 	}
 }

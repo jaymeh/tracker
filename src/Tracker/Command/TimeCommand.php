@@ -142,6 +142,8 @@ class TimeCommand extends Command
         // Put data into another array in a format that helps us
         // reduce the api calls we are making
         foreach($projects as $cb_project) {
+            $cb_project = $cb_project['project'];
+
         	if(!isset($cb_project_data[$cb_project['name']])) {
         		$cb_project_data[$cb_project['name']] = $cb_project;
         	}
@@ -204,25 +206,20 @@ class TimeCommand extends Command
 
         $used_projects = array();
 
-        var_dump($cb_project_data);
-
         // Loop through the time entries and populate the times from our projects
         foreach($times as $time_entry) {
             $project = $toggl_helper->getProjectById($time_entry['pid']);
-
-           // var_dump($project);
-
-            //var_dump($cb_project_data);
 
             if(isset($project['name'])) {
                 if(isset($cb_project_data[$project['name']])) {
                     $cb_project = $cb_project_data[$project['name']];
 
-                    //var_dump($cb_project);
-                    $used_projects[$project['name']] = $cb_helper->getTimeSessions($cb_project['permalink'], $start_date_formatted, $end_date_formatted);
+                    $used_projects[$project['name']] = $cb_helper->getTimeSessions($cb_project['permalink'], $start_date, $end_date);
                 }
             }
         }
+
+        //var_dump($used_projects);
 
 //         var_dump($used_projects);
         die;
