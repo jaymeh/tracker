@@ -124,7 +124,6 @@ class TimeCommand extends Command
         	return;
         }
 
-
         $projects = $cb_helper->projects($archived);
 
         if(!is_array($projects)) {
@@ -203,6 +202,32 @@ class TimeCommand extends Command
             }
         }
 
+        $used_projects = array();
+
+        var_dump($cb_project_data);
+
+        // Loop through the time entries and populate the times from our projects
+        foreach($times as $time_entry) {
+            $project = $toggl_helper->getProjectById($time_entry['pid']);
+
+           // var_dump($project);
+
+            //var_dump($cb_project_data);
+
+            if(isset($project['name'])) {
+                if(isset($cb_project_data[$project['name']])) {
+                    $cb_project = $cb_project_data[$project['name']];
+
+                    //var_dump($cb_project);
+                    $used_projects[$project['name']] = $cb_helper->getTimeSessions($cb_project['permalink'], $start_date_formatted, $end_date_formatted);
+                }
+            }
+        }
+
+//         var_dump($used_projects);
+        die;
+
+
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
             if(!isset($time_entry['pid'])) {
@@ -268,6 +293,10 @@ class TimeCommand extends Command
                    $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
                     continue;
                 }
+
+                /* Check that the time entry doesn't already exist */
+                // We have to do seperate api calls for this since we have to pass a project which we don't know until we have the time session?
+                // Could populate it based off the projects given in toggl?
 
                 // Log the time entry
                 $server_response = $cb_helper->createTimeSession($project_link, $time, $note);

@@ -28,23 +28,20 @@ class CodebaseApiHelper {
 			$call_url = $this->site_base_url.$endpoint;
 		}
 
+		$headers = array();
+		$headers[] = 'Accept: application/json';
+		$headers[] = 'Content-Type: application/json';
+
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($ch, CURLOPT_URL, $call_url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		// curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		curl_setopt($ch, CURLOPT_USERPWD, "$this->api_user:$this->api_key");
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-		$xml_data = curl_exec($ch);
-		$response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$data = curl_exec($ch);
 
-		if($response !== 200) {
-			$error = trim($xml_data);
-			return $error;
-		}
-
-		$xml = simplexml_load_string($xml_data);
-		$json = json_encode($xml);
-		$array = json_decode($json,TRUE);
+		$array = json_decode($data,TRUE);
 
 		return $array;
 	}
@@ -78,8 +75,12 @@ class CodebaseApiHelper {
 			return $projects;
 		}
 
+		// var_dump($projects);
+
+		var_dump($projects);
+
 		if(count($projects)) {
-			foreach($projects['project'] as $key => $project) {
+			foreach($projects as $key => $project) {
 				if(!$include_archived) {
 					if($project['status'] == 'archived') {
 						unset($projects['project'][$key]);
@@ -87,7 +88,7 @@ class CodebaseApiHelper {
 				}
 			}
 
-			return $projects['project'];
+			return $projects;
 		}
 	}
 
@@ -197,5 +198,11 @@ class CodebaseApiHelper {
 		}
 
 		return $error;
+	}
+
+	function getTimeSessions($project, $dateFrom, $dateTo) {
+		$time_sessions = $this->call('/'.$project.'/time_sessions?from='.$dateFrom.'&to='.$dateTo);
+
+		var_dump($time_sessions);
 	}
 }
