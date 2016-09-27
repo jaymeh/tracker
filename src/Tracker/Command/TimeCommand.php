@@ -204,7 +204,7 @@ class TimeCommand extends Command
             }
         }
 
-        $used_projects = array();
+        $logged_times = array();
 
         // Loop through the time entries and populate the times from our projects
         foreach($times as $time_entry) {
@@ -214,10 +214,12 @@ class TimeCommand extends Command
                 if(isset($cb_project_data[$project['name']])) {
                     $cb_project = $cb_project_data[$project['name']];
 
-                    $used_projects[$project['name']] = $cb_helper->getTimeSessions($cb_project['permalink'], $start_date, $end_date);
+                    $logged_times[$project['name']] = $cb_helper->getTimeSessions($cb_project['permalink'], $start_date, $end_date);
                 }
             }
         }
+
+        var_dump($logged_times);
 
         //var_dump($used_projects);
 
