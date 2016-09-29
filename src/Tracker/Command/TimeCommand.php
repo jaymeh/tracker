@@ -117,7 +117,7 @@ class TimeCommand extends Command
 
         // Load in projects
         $cb_helper = new CodebaseApiHelper();
-        $config_data = $cb_helper->get_config_data();
+        $config_data = $cb_helper->getConfigData();
 
         if($config_data !== true) {
         	$output->writeln('<error>'.$config_data.'</error>');
@@ -152,7 +152,7 @@ class TimeCommand extends Command
         // Load in the toggl helper and get all time entries based
         // on the given dates
         $toggl_helper = new TogglApiHelper();
-        $toggl_config_data = $toggl_helper->get_config_data();
+        $toggl_config_data = $toggl_helper->getConfigData();
 
         if($toggl_config_data !== true) {
         	$output->writeln('<error>'.$toggl_config_data.'</error>');
@@ -220,10 +220,6 @@ class TimeCommand extends Command
         }
 
         var_dump($logged_times);
-
-        //var_dump($used_projects);
-
-//         var_dump($used_projects);
         die;
 
 
@@ -296,6 +292,7 @@ class TimeCommand extends Command
                 /* Check that the time entry doesn't already exist */
                 // We have to do seperate api calls for this since we have to pass a project which we don't know until we have the time session?
                 // Could populate it based off the projects given in toggl?
+                // Check current time
 
                 // Log the time entry
                 $server_response = $cb_helper->createTimeSession($project_link, $time, $note);

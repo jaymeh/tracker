@@ -9,7 +9,7 @@ class CodebaseApiHelper {
 	private $site_base_url = 'https://api3.codebasehq.com';
 
 	function __construct() {
-		$this->get_config_data();
+		$this->getConfigData();
 	}
 
 	/**
@@ -107,6 +107,9 @@ class CodebaseApiHelper {
 
 		$data_array = array();
 
+		// Check that the time entry exists?
+
+
 		if(!isset($time['start'])) {
 			return false;
 		}
@@ -142,7 +145,10 @@ class CodebaseApiHelper {
 
 		$post_data = $xml_data->asXML();
 
-		$posted = $this->post($endpoint, $post_data);
+		var_dump('remove me please?');
+		// $posted = $this->post($endpoint, $post_data);
+
+		$posted = true;
 
 		return $posted;
 	}
@@ -157,7 +163,19 @@ class CodebaseApiHelper {
 		return $ticket_id;
 	}
 
-	public function get_config_data() {
+	public function getCurrentUser() {
+		$user = $this->call('/profile');
+
+		if(!isset($user['user'])) {
+			return false;
+		}
+
+		$user = $user['user'];
+
+		return $user;
+	}
+
+	public function getConfigData() {
 		$user = exec('whoami');
 
 		$directory = '/Users/'.$user.'/.tracker/';
@@ -204,27 +222,15 @@ class CodebaseApiHelper {
 		// Replace this section and use the following endpoint
 		// http://api3.codebasehq.com/profile
 		// This wasn't in the API docs
-
-		$users = $this->getProjectAssignments($project);
-		$current_user_id = false;
-
-		// Bit of a hack to clean the username. Might need to figure out another solution if possible.
-		$user_stripped = str_replace('creode/', '', $this->api_user);
-
-		foreach($users as $user) {
-			if($user['username'] == $user_stripped) {
-				$current_user_id = $user['id'];
-			}
-		}
-
-		var_dump($current_user_id);
+		$user = $this->getCurrentUser();
+		$userId = $user['id'];
 
 		// Today was used
 		if($today == $dateFromFormatted && $today == $dateToFormatted) {
-			$time_string = '/'.$project.'/time_sessions/day?user-id='.$current_user_id;
+			$time_string = '/'.$project.'/time_sessions/day';
 		// Yesterday was used
 		} else if($dateFromFormatted == $dateToFormatted) {
-			$time_string = '/'.$project.'/time_sessions?from='.$dateToFormatted.'&user-id='.$current_user_id;
+			$time_string = '/'.$project.'/time_sessions?from='.$dateToFormatted;
 		// Custom date was used (FIX THIS AT SOME POINT)
 		} else {
 			/* $modifiedTo = clone $dateTo;
@@ -240,10 +246,10 @@ class CodebaseApiHelper {
 		$time_sessions = $this->call($time_string);
 		$new_times = array();
 
-		var_dump($time_string);
-
 		foreach($time_sessions as $time_session) {
-			$new_times[] = $time_session['time_session'];
+			if($time_session['time_session']['user_id'] == $userId) {
+				$new_times[] = $time_session['time_session'];
+			}
 		}
 
 		return $new_times;
