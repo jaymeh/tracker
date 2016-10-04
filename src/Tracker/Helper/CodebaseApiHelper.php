@@ -9,7 +9,7 @@ class CodebaseApiHelper {
 	private $site_base_url = 'https://api3.codebasehq.com';
 
 	function __construct() {
-		$this->get_config_data();
+		$this->getConfigData();
 	}
 
 	/**
@@ -28,23 +28,20 @@ class CodebaseApiHelper {
 			$call_url = $this->site_base_url.$endpoint;
 		}
 
+		$headers = array();
+		$headers[] = 'Accept: application/json';
+		$headers[] = 'Content-Type: application/json';
+
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($ch, CURLOPT_URL, $call_url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		// curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		curl_setopt($ch, CURLOPT_USERPWD, "$this->api_user:$this->api_key");
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-		$xml_data = curl_exec($ch);
-		$response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$data = curl_exec($ch);
 
-		if($response !== 200) {
-			$error = trim($xml_data);
-			return $error;
-		}
-
-		$xml = simplexml_load_string($xml_data);
-		$json = json_encode($xml);
-		$array = json_decode($json,TRUE);
+		$array = json_decode($data,TRUE);
 
 		return $array;
 	}
@@ -79,7 +76,7 @@ class CodebaseApiHelper {
 		}
 
 		if(count($projects)) {
-			foreach($projects['project'] as $key => $project) {
+			foreach($projects as $key => $project) {
 				if(!$include_archived) {
 					if($project['status'] == 'archived') {
 						unset($projects['project'][$key]);
@@ -87,7 +84,7 @@ class CodebaseApiHelper {
 				}
 			}
 
-			return $projects['project'];
+			return $projects;
 		}
 	}
 
@@ -110,6 +107,7 @@ class CodebaseApiHelper {
 
 		$data_array = array();
 
+		// Check that the time entry exists?
 		if(!isset($time['start'])) {
 			return false;
 		}
@@ -145,7 +143,10 @@ class CodebaseApiHelper {
 
 		$post_data = $xml_data->asXML();
 
-		$posted = $this->post($endpoint, $post_data);
+		var_dump('remove me please?');
+		// $posted = $this->post($endpoint, $post_data);
+
+		$posted = true;
 
 		return $posted;
 	}
@@ -160,7 +161,7 @@ class CodebaseApiHelper {
 		return $ticket_id;
 	}
 
-	public function get_config_data() {
+	public function getConfigData() {
 		$user = exec('whoami');
 
 		$directory = '/Users/'.$user.'/.tracker/';
@@ -197,5 +198,57 @@ class CodebaseApiHelper {
 		}
 
 		return $error;
+	}
+
+	public function getTimeSessions($project, $dateFrom, $dateTo) {
+		$dateFromFormatted = $dateFrom->format('Y-m-d');
+		$dateToFormatted = $dateTo->format('Y-m-d');
+		$today = date('Y-m-d');
+
+		// Replace this section and use the following endpoint
+		// http://api3.codebasehq.com/profile
+		// This wasn't in the API docs
+		$user = $this->getCurrentUser();
+		$userId = $user['id'];
+
+		// Today was used
+		if($today == $dateFromFormatted && $today == $dateToFormatted) {
+			$time_string = '/'.$project.'/time_sessions/day';
+		// Yesterday was used
+		} else if($dateFromFormatted == $dateToFormatted) {
+			$time_string = '/'.$project.'/time_sessions?from='.$dateToFormatted;
+		// Custom date was used (FIX THIS AT SOME POINT)
+		} else {
+			$modifiedTo = clone $dateTo;
+			$modifiedTo->modify('+1 days');
+			$modifiedFrom = clone $dateFrom;
+			$dateFromFormatted = $modifiedFrom->format('Y-m-d');
+			$dateToFormatted = $modifiedTo->format('Y-m-d');
+
+			$time_string = '/'.$project.'/time_sessions?to='.$dateToFormatted.'&from='.$dateFromFormatted;
+		}
+
+		$time_sessions = $this->call($time_string);
+		$new_times = array();
+
+		foreach($time_sessions as $time_session) {
+			if($time_session['time_session']['user_id'] == $userId) {
+				$new_times[] = $time_session['time_session'];
+			}
+		}
+
+		return $new_times;
+	}
+
+	public function getCurrentUser() {
+		$user = $this->call('/profile');
+
+		if(!isset($user['user'])) {
+			return false;
+		}
+
+		$user = $user['user'];
+
+		return $user;
 	}
 }
