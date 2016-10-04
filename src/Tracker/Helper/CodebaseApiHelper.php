@@ -108,8 +108,6 @@ class CodebaseApiHelper {
 		$data_array = array();
 
 		// Check that the time entry exists?
-
-
 		if(!isset($time['start'])) {
 			return false;
 		}
@@ -161,18 +159,6 @@ class CodebaseApiHelper {
 		$ticket_id = intval($ticket_id);
 
 		return $ticket_id;
-	}
-
-	public function getCurrentUser() {
-		$user = $this->call('/profile');
-
-		if(!isset($user['user'])) {
-			return false;
-		}
-
-		$user = $user['user'];
-
-		return $user;
 	}
 
 	public function getConfigData() {
@@ -255,19 +241,15 @@ class CodebaseApiHelper {
 		return $new_times;
 	}
 
-	public function getProjectAssignments($project) {
-		$assignments = array();
-		$final_assignments = array();
+	public function getCurrentUser() {
+		$user = $this->call('/profile');
 
-		$assignments = $this->call('/'.$project.'/assignments');
-
-		if(count($assignments)) {
-			foreach($assignments as $assignment) {
-				$assignment = $assignment['user'];
-				$final_assignments[$assignment['id']] = $assignment;
-			}
+		if(!isset($user['user'])) {
+			return false;
 		}
 
-		return $final_assignments;
+		$user = $user['user'];
+
+		return $user;
 	}
 }

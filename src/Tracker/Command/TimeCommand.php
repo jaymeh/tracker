@@ -217,17 +217,13 @@ class TimeCommand extends Command
                     $logged_times[$project['name']] = $cb_helper->getTimeSessions($cb_project['permalink'], $start_date, $end_date);
                 }
             }
-        }
-
-        var_dump($logged_times);
-        die;
-
+        } 
 
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
             if(!isset($time_entry['pid'])) {
                 // Can't find the project from toggl
-                $output->writeln('<error>Could not find toggl project attached to time entry: '.$time_entry['description'].'</error>');
+                $output->writeln('<error>Could not find toggl project attached to time entry: '.$time_entry['description'].'. This has therefore not being added to codebase.</error>');
                 continue;
             }
 
@@ -247,8 +243,6 @@ class TimeCommand extends Command
 
             // Get project item based on the project from Toggl
             $cb_project_item = $cb_project_data[$project['name']];
-
-            // Check for the touch with a ticket id and use it somehow.
             $note = $time_entry['description'];
 
             if($cb_project_item) {
@@ -267,10 +261,10 @@ class TimeCommand extends Command
                 $format_helper = new FormatHelper();
                 $ticket_string = $format_helper->get_string_between($note, '[', ']');
 
+                // Check for the touch with a ticket id and use it somehow.
                 $ticket_id = false;
-
                 if($ticket_string !== false) {
-                   $ticket_id = $cb_helper->checkTicketId($ticket_string); 
+                   $ticket_id = $cb_helper->checkTicketId($ticket_string);
                 }
 
                 // Get the duration to output. This is because toggl returns it
@@ -278,27 +272,69 @@ class TimeCommand extends Command
                 $duration = $time['duration'] / 60;
 
                 if($ticket_id) {
-                    // Log the ticket
-                   $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
+                    /* If its a ticket then check that the date, id and project match */
+                    $codebase_times = $logged_times[$cb_project_item['name']];
 
-                   // Strip out the touch for the description in future
-                   $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
+                    $matches = array();
 
-                   // Output something to help see whats happening
-                   $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
+                    $session_timestamp = strtotime($time['start']);
+                    $session_date = date('Y-m-d', $session_timestamp);
+
+                    $duplicate = false;
+
+                    $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
+
+                    foreach($codebase_times as $codebase_time) {
+                        if($codebase_time['ticket_id'] == $ticket_id &&
+                            $codebase_time['session_date'] == $session_date &&
+                            $codebase_time['minutes'] == intval(round($duration))) {
+                            // Skip this because its already logged?
+                            $output->writeln('<error>Duplicate entry found for ('.$ticket_id.'): "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes. Skipping this.</error>');
+                            $duplicate = true;
+                        }
+                    }
+
+                    if($duplicate == false) {
+                        // Log the ticket
+                        // $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
+
+                        // Strip out the touch for the description in future
+                        $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
+
+                        // Output something to help see whats happening
+                        $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
+                    }                    
+                    
                     continue;
                 }
 
                 /* Check that the time entry doesn't already exist */
-                // We have to do seperate api calls for this since we have to pass a project which we don't know until we have the time session?
-                // Could populate it based off the projects given in toggl?
-                // Check current time
+                $codebase_times = $logged_times[$cb_project_item['name']];
 
-                // Log the time entry
-                $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
+                $matches = array();
 
-                // Output something to help see whats happening
-                $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
+                $session_timestamp = strtotime($time['start']);
+                $session_date = date('Y-m-d', $session_timestamp);
+
+                $duplicate = false;
+
+                foreach($codebase_times as $codebase_time) {
+                    if($codebase_time['summary'] == $time_entry['description'] &&
+                        $codebase_time['session_date'] == $session_date &&
+                        ($codebase_time['minutes']) == intval(round($duration))) {
+                        // Skip this because its already logged?
+                        $output->writeln('<error>Duplicate entry found for "'.$time_entry['description'].'" '.intval(round($duration)).' minutes. Skipping this.</error>');
+                        $duplicate = true;
+                    }
+                }
+
+                if(!$duplicate) {
+                    // Log the time entry
+                    // $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
+
+                    // Output something to help see whats happening
+                    $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
+                }
             }
         }
     }
