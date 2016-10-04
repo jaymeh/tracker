@@ -124,6 +124,8 @@ class TimeCommand extends Command
         	return;
         }
 
+        $output->writeln('<fg=white;bg=black>Finding codebase projects.</>');
+
         $projects = $cb_helper->projects($archived);
 
         if(!is_array($projects)) {
@@ -159,6 +161,8 @@ class TimeCommand extends Command
         	return;
         }
 
+        $output->writeln('<fg=white;bg=black>Pulling in times from Toggl.</>');
+
         $times = $toggl_helper->times($start_date_formatted, $end_date_formatted);
 
         $projects = '';
@@ -167,6 +171,8 @@ class TimeCommand extends Command
 
         /* Combine time entries based on project, date and description */
         $times_temp = $times;
+
+        $output->writeln('<fg=white;bg=black>Putting times into the correct format.</>');
 
         foreach($times as $key => $time_entry) {
             // Setup current times variables
@@ -206,6 +212,8 @@ class TimeCommand extends Command
 
         $logged_times = array();
 
+        $output->writeln('<fg=white;bg=black>Grabbing required projects for current toggle time range.</>');
+
         // Loop through the time entries and populate the times from our projects
         foreach($times as $time_entry) {
             $project = $toggl_helper->getProjectById($time_entry['pid']);
@@ -217,7 +225,9 @@ class TimeCommand extends Command
                     $logged_times[$project['name']] = $cb_helper->getTimeSessions($cb_project['permalink'], $start_date, $end_date);
                 }
             }
-        } 
+        }
+
+        $output->writeln('<fg=white;bg=black>Processing time entries.</>');
 
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
@@ -289,7 +299,7 @@ class TimeCommand extends Command
                             $codebase_time['session_date'] == $session_date &&
                             $codebase_time['minutes'] == intval(round($duration))) {
                             // Skip this because its already logged?
-                            $output->writeln('<error>Duplicate entry found for ('.$ticket_id.'): "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes. Skipping this.</error>');
+                            $output->writeln('<comment>Duplicate entry found for ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes. Skipping this.</comment>');
                             $duplicate = true;
                         }
                     }
@@ -302,7 +312,7 @@ class TimeCommand extends Command
                         $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
 
                         // Output something to help see whats happening
-                        $output->writeln('<info>Tracked Time entry to Codebase Ticket ('.$ticket_id.'): "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
+                        $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
                     }                    
                     
                     continue;
@@ -323,7 +333,7 @@ class TimeCommand extends Command
                         $codebase_time['session_date'] == $session_date &&
                         ($codebase_time['minutes']) == intval(round($duration))) {
                         // Skip this because its already logged?
-                        $output->writeln('<error>Duplicate entry found for "'.$time_entry['description'].'" '.intval(round($duration)).' minutes. Skipping this.</error>');
+                        $output->writeln('<comment>Duplicate entry found for ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes. Skipping this.</comment>');
                         $duplicate = true;
                     }
                 }
@@ -333,7 +343,7 @@ class TimeCommand extends Command
                     // $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
 
                     // Output something to help see whats happening
-                    $output->writeln('<info>Tracked Time entry to Codebase: "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
+                    $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
                 }
             }
         }

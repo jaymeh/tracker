@@ -219,14 +219,13 @@ class CodebaseApiHelper {
 			$time_string = '/'.$project.'/time_sessions?from='.$dateToFormatted;
 		// Custom date was used (FIX THIS AT SOME POINT)
 		} else {
-			/* $modifiedTo = clone $dateTo;
+			$modifiedTo = clone $dateTo;
 			$modifiedTo->modify('+1 days');
 			$modifiedFrom = clone $dateFrom;
-			$modifiedFrom->modify('-1 day');
 			$dateFromFormatted = $modifiedFrom->format('Y-m-d');
 			$dateToFormatted = $modifiedTo->format('Y-m-d');
 
-			$time_string = '/'.$project.'/time_sessions?to='.$dateToFormatted.'&from='.$dateToFormatted; */
+			$time_string = '/'.$project.'/time_sessions?to='.$dateToFormatted.'&from='.$dateFromFormatted;
 		}
 
 		$time_sessions = $this->call($time_string);
