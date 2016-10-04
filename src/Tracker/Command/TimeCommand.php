@@ -306,7 +306,7 @@ class TimeCommand extends Command
 
                     if($duplicate == false) {
                         // Log the ticket
-                        // $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
+                        $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
 
                         // Strip out the touch for the description in future
                         $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
@@ -340,7 +340,7 @@ class TimeCommand extends Command
 
                 if(!$duplicate) {
                     // Log the time entry
-                    // $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
+                    $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
 
                     // Output something to help see whats happening
                     $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
