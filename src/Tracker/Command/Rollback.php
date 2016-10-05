@@ -21,11 +21,13 @@ class Rollback extends Command {
 		    $result = $updater->rollback();
 		    if (! $result) {
 		        // report failure!
+		        $output->writeln('<error>An error occured. Couldn\'t roll back version</error>');
 		        exit;
 		    }
 		    exit;
 		} catch (\Exception $e) {
 		    // Report an error!
+		    $output->writeln('<error>'.$e->getMessage().'</error>');
 		    exit;
 		}
 	}
