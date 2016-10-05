@@ -7,6 +7,7 @@ $updater->getStrategy()->setPharUrl('https://jamiesykescreode.github.io/tracker/
 $updater->getStrategy()->setVersionUrl('https://jamiesykescreode.github.io/tracker/tracker.phar.version');
 try {
     $result = $updater->update();
+    var_dump($result);
     if (! $result) {
         // No update needed!
         exit;
@@ -17,6 +18,7 @@ try {
     exit;
 } catch (\Exception $e) {
     // Report an error!
+    var_dump($e);
     exit;
 }
 
