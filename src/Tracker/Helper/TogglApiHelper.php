@@ -10,7 +10,7 @@ class TogglApiHelper {
 	private $toggl_workspace_id = '';
 	
 	function __construct() {
-		$this->get_config_data();
+		$this->getConfigData();
 	}
 
 	private function call($endpoint) {
@@ -164,7 +164,7 @@ class TogglApiHelper {
 		}
 	}
 
-	public function get_config_data() {
+	public function getConfigData() {
 		$user = exec('whoami');
 
 		$directory = '/Users/'.$user.'/.tracker/';

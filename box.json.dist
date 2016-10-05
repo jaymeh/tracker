@@ -1,21 +1,24 @@
 {
-    "chmod": "0755",
-    "directories": [
-        "src"
-    ],
-    "files": [
-        "LICENSE",
-        "vendor/herrera-io/phar-update/res/schema.json"
-    ],
-    "finder": [
-        {
-            "name": "*.php",
-            "exclude": ["Tests"],
-            "in": "vendor"
-        }
-    ],
-    "git-version": "package_version",
-    "main": "bin/tracker",
-    "output": "tracker.phar",
-    "stub": true
+  "algorithm": "OPENSSL",
+  "chmod": "0755",
+  "compression": "GZ",
+  "directories": [
+    "src"
+  ],
+  "finder": [
+    {
+      "name": "*.php",
+      "exclude": [
+        "tests",
+        "test"
+      ],
+      "in": "vendor"
+    }
+  ],
+  "git-version": "package_version",
+  "intercept": true,
+  "key": ".travis/phar-private.pem",
+  "main": "bin/tracker",
+  "output": "tracker.phar",
+  "stub": true
 }
