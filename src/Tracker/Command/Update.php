@@ -23,6 +23,7 @@ class Update extends Command {
             $result = $updater->update();
             if (! $result) {
                 // No update needed!
+                $output->writeln('<info>Tracker is already at the latest version. Go you! :)</info>');
                 exit;
             }
             $new = $updater->getNewVersion();
