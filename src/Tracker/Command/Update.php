@@ -28,9 +28,6 @@ class Update extends Command {
             $new = $updater->getNewVersion();
             $old = $updater->getOldVersion();
 
-            $output->writeln(exec('pwd'));
-            exec('mv tracker.phar tracker');
-
             $output->writeln('<info>Updated from '.$old.' to '.$new.'</info>');
             exit;
         } catch (\Exception $e) {
