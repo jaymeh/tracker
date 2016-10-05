@@ -3,3 +3,7 @@ cliph.phar
 box.json
 private.key
 cliph.phar.pubkey
+.travis/phar-private.pem
+tracker.phar
+tracker.phar.pubkey
+tracker.phar.version
