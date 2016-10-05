@@ -19,6 +19,9 @@ class Update extends Command {
         $updater = new Updater();
         $updater->getStrategy()->setPharUrl('https://jamiesykescreode.github.io/tracker/tracker.phar');
         $updater->getStrategy()->setVersionUrl('https://jamiesykescreode.github.io/tracker/tracker.phar.version');
+
+        $output->writeln(exec('pwd'));
+        // exec('mv tracker.phar tracker');
         try {
             $result = $updater->update();
             if (! $result) {
@@ -27,7 +30,11 @@ class Update extends Command {
             }
             $new = $updater->getNewVersion();
             $old = $updater->getOldVersion();
-            printf('Updated from %s to %s', $old, $new);
+
+            $output->writeln(exec('pwd'));
+            exec('mv tracker.phar tracker');
+
+            $output->writeln('<info>Updated from '.$old.' to '.$new.'</info>');
             exit;
         } catch (\Exception $e) {
             // Report an error!
