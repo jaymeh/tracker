@@ -11,4 +11,6 @@ $application = new Application('Toggl Tracker', '@package_version@');
 $application->add(new Command\ProjectImport());
 $application->add(new Command\TimeCommand());
 $application->add(new Command\Configure());
+$application->add(new Command\Update());
+$application->add(new Command\Rollback());
 $application->run();
