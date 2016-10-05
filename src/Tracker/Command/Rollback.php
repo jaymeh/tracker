@@ -24,6 +24,8 @@ class Rollback extends Command {
 		        $output->writeln('<error>An error occured. Couldn\'t roll back version</error>');
 		        exit;
 		    }
+
+		    $output->writeln('<info>Successfully rolled back version</info>');
 		    exit;
 		} catch (\Exception $e) {
 		    // Report an error!
