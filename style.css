@@ -1,0 +1,47 @@
+.button {
+    border-radius: 4px;
+    padding: 2px 6px 3px;
+    align-items: flex-start;
+    text-align: center;
+    cursor: default;
+    box-sizing: border-box;
+    padding: 2px 6px 3px;
+    border-width: 2px;
+    border-style: outset;
+    text-rendering: auto;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+}
+
+.navbar-form {
+	margin-top: 25px;
+}
+
+.navbar-brand {
+	height: auto;
+}
+
+.navbar-brand img {
+	max-height: 50px;
+}
+
+img {
+	max-width: 100%;
+}
+
+.top {
+	margin-top: 15px;
+}
+
+.max-55 {
+	max-width: 55%;
+}
+
+.max-40 {
+	max-width: 40%;
+}
