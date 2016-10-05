@@ -19,9 +19,6 @@ class Update extends Command {
         $updater = new Updater();
         $updater->getStrategy()->setPharUrl('https://jamiesykescreode.github.io/tracker/tracker.phar');
         $updater->getStrategy()->setVersionUrl('https://jamiesykescreode.github.io/tracker/tracker.phar.version');
-
-        $output->writeln(exec('pwd'));
-        // exec('mv tracker.phar tracker');
         try {
             $result = $updater->update();
             if (! $result) {
