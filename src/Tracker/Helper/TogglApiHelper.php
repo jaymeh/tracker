@@ -10,7 +10,12 @@ class TogglApiHelper {
 	private $toggl_workspace_id = '';
 	
 	function __construct() {
-		$this->getConfigData();
+		$error = $this->getConfigData();
+		if($error !== true) {
+			echo $error;
+			exit;
+		}
+
 	}
 
 	private function call($endpoint) {
@@ -179,6 +184,9 @@ class TogglApiHelper {
     	$error = false;
 
     	try {
+    		if(!file_get_contents($file)) {
+    			return 'Could not find configuration file in '.$file.'. Please check that the configure command has been run.';
+    		}
 		    $value = Yaml::parse(file_get_contents($file));
 		} catch (ParseException $e) {
 		    $error = printf("Unable to parse the YAML string: %s", $e->getMessage());
