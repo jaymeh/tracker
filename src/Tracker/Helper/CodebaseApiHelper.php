@@ -9,7 +9,11 @@ class CodebaseApiHelper {
 	private $site_base_url = 'https://api3.codebasehq.com';
 
 	function __construct() {
-		$this->getConfigData();
+		$error = $this->getConfigData();
+		if($error !== true) {
+			echo $error;
+			exit;
+		}
 	}
 
 	/**
@@ -77,6 +81,7 @@ class CodebaseApiHelper {
 
 		if(count($projects)) {
 			foreach($projects as $key => $project) {
+				$project = $project['project'];
 				if(!$include_archived) {
 					if($project['status'] == 'archived') {
 						unset($projects['project'][$key]);
@@ -181,6 +186,9 @@ class CodebaseApiHelper {
     	$error = false;
 
     	try {
+    		if(!file_get_contents($file)) {
+    			return 'Could not find configuration file in '.$file.'. Please check that the configure command has been run.';
+    		}
 		    $value = Yaml::parse(file_get_contents($file));
 		} catch (ParseException $e) {
 		    $error = printf("Unable to parse the YAML string: %s", $e->getMessage());
