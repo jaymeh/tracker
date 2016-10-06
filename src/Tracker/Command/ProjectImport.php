@@ -98,6 +98,7 @@ class ProjectImport extends Command
        	
        	// Loop through the projects
        	foreach($codebase_projects as $codebase_project) {
+          $codebase_project = $codebase_project['project'];
        		$client_data = $api_caller_toggl->createClient($codebase_project['name'], $workspace_id);
 
        		$codebase_project['name'];
