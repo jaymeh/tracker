@@ -1,0 +1,41 @@
+Tracker Manual
+
+Attach ticket id to time entry
+
+In order to add a ticket entry to toggl you need to reference it like so in the time description
+
+[touch: {ticket-id}]
+
+e.g.
+
+[touch: 162]
+
+Also for time to be tracked each entry needs to have a project attached. You should have these projects populated in toggl once the project import script has ran.
+
+Initial Setup
+
+"tracker configure"
+
+Provides a quick wizard asking for your api details for toggl and codebase
+
+Project import
+
+Imports codebase projects into the given workspace of toggl
+
+"tracker project-import"
+
+Update Time
+
+Update time examples
+
+tracker-time-update {[today, yesterday, custom]}
+
+"tracker time-update today"
+
+You can also replace "today" with "yesterday".
+
+You can also pass a custom date range to update a week at a time
+
+tracker time-update {[today, yesterday, custom]} {start-date} {end-date}
+
+"tracker time-update custom 19/09/2016 23/09/2016"

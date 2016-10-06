@@ -1,0 +1,11 @@
+1. Put tracker in folder we can access it and make it executable
+	- sudo mv tracker /usr/bin/local/
+	- sudo chmod 0755 /usr/bin/local/tracker
+2. Add /usr/local/bin to path if it doesn't exist add the following line to ~/.bash_profile
+	- vi ~/.bash_profile
+	- export PATH="/usr/local/bin:$PATH"
+	- source ~/.bash_profile
+3. Check that the command exists by running
+	- which tracker
+4. If you get a result like below then everything is setup correctly. If not check that the permissions of the tracker folder is correct and that all commands above have been ran.
+	- /usr/local/bin/tracker
