@@ -147,9 +147,7 @@ class CodebaseApiHelper {
 		array_walk_recursive($data_array, array ($xml_data, 'addChild'));
 
 		$post_data = $xml_data->asXML();
-
-		var_dump('remove me please?');
-		// $posted = $this->post($endpoint, $post_data);
+		$posted = $this->post($endpoint, $post_data);
 
 		$posted = true;
 
