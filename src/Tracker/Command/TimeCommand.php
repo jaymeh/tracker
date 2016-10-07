@@ -184,26 +184,31 @@ class TimeCommand extends Command
             $end_formatted = date('d/m/Y', $end_date_timestamp);
 
             $description = $time_entry['description'];
-            $project = $time_entry['pid'];
 
-            // Loop through each time entry checking for the duplicates
-            foreach($times_temp as $new_key => $time_new) {
-                if($id !== $time_new['id']) {
-                    $time_new_start_timestamp = strtotime($time_new['start']);
-                    $time_new_start_formatted = date('d/m/Y', $time_new_start_timestamp);
+            if(isset($time_entry['pid'])) {
+                $project = $time_entry['pid'];
 
-                    $time_new_end_timestamp = strtotime($time_new['start']);
-                    $time_new_end_formatted = date('d/m/Y', $time_new_end_timestamp);
-                    
-                    // Check if the project, start date, end date and description match each other. If they do then condense the entry down
-                    if($time_new_start_formatted == $start_formatted &&
-                        $time_new_end_formatted == $end_formatted &&
-                        $description == $time_new['description'] &&
-                        $project == $time_new['pid']) {
+                // Loop through each time entry checking for the duplicates
+                foreach($times_temp as $new_key => $time_new) {
+                    if($id !== $time_new['id']) {
+                        $time_new_start_timestamp = strtotime($time_new['start']);
+                        $time_new_start_formatted = date('d/m/Y', $time_new_start_timestamp);
 
-                        if($times[$key]) {
-                            $times[$key]['duration'] += $time_new['duration'];
-                            unset($times[$new_key]);
+                        $time_new_end_timestamp = strtotime($time_new['start']);
+                        $time_new_end_formatted = date('d/m/Y', $time_new_end_timestamp);
+                        
+                        // Check if the project, start date, end date and description match each other. If they do then condense the entry down
+                        if($time_new_start_formatted == $start_formatted &&
+                            $time_new_end_formatted == $end_formatted &&
+                            $description == $time_new['description'] &&
+                            $project == $time_new['pid']) {
+
+
+
+                            if(isset($times[$key])) {
+                                $times[$key]['duration'] += $time_new['duration'];
+                                unset($times[$new_key]);
+                            }
                         }
                     }
                 }
@@ -216,6 +221,10 @@ class TimeCommand extends Command
 
         // Loop through the time entries and populate the times from our projects
         foreach($times as $time_entry) {
+            if(!isset($time_entry['pid'])) {
+                // Skip it if it has no project attached
+                continue;
+            }
             $project = $toggl_helper->getProjectById($time_entry['pid']);
 
             if(isset($project['name'])) {
@@ -228,6 +237,8 @@ class TimeCommand extends Command
         }
 
         $output->writeln('<fg=white;bg=black>Processing time entries.</>');
+
+        $total_tracked_minutes = 0;
 
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
@@ -342,10 +353,18 @@ class TimeCommand extends Command
                     // Log the time entry
                     $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
 
+                    $total_tracked_minutes += intval(round($time['duration'] / 60));
+
                     // Output something to help see whats happening
                     $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
                 }
             }
         }
+
+        if($total_tracked_minutes !== 0) {
+            $formatted_minutes = $format_helper->convert_codebase_minutes($total_tracked_minutes);
+            $output->writeln('<fg=white;bg=black>You have tracked a total of '.$formatted_minutes.'.</>');
+        }
+
     }
 }
