@@ -46,7 +46,17 @@ class Configure extends Command
 
     	$file = $directory.'config.yml';
 
-    	$check_file = fopen($file, "w");
+    	$codebase_api_user = '';
+    	$codebase_api_key = '';
+    	$toggl_api_key = '';
+
+    	if(file_exists($file)) {
+    		$toggl_helper = new TogglApiHelper();
+    		$cb_helper = new CodebaseApiHelper();
+			$codebase_api_user = $cb_helper->api_user;
+			$codebase_api_key = $cb_helper->api_key;
+    		$toggl_api_key = $toggl_helper->api_key;
+    	}
 
     	// What do we need from the user?
     	// Codebase API User
@@ -54,7 +64,7 @@ class Configure extends Command
     	// Toggl API Key
 
     	$helper = $this->getHelper('question');
-	    $question = new Question('Please enter your api username for Codebase (You can generate this username here <info>https://creode.codebasehq.com/settings/profile</info>): ', '');
+	    $question = new Question('Please enter your api username for Codebase ( You can generate this username here <info>https://creode.codebasehq.com/settings/profile</info> ): ', $codebase_api_user);
 
 	    $cb_api_user = $helper->ask($input, $output, $question);
 
@@ -63,7 +73,7 @@ class Configure extends Command
 	    	return;
 	    }
 
-	    $question2 = new Question('Please enter your api key for Codebase (You can generate this key here <info>https://creode.codebasehq.com/settings/profile</info>): ', '');
+	    $question2 = new Question('Please enter your api key for Codebase ( You can generate this key here <info>https://creode.codebasehq.com/settings/profile</info> ): ', $codebase_api_key);
 
 	    $cb_api_key = $helper->ask($input, $output, $question2);
 
@@ -72,7 +82,7 @@ class Configure extends Command
 	    	return;
 	    }
 
-	    $question3 = new Question('Please enter your api key for Toggl (You can find this at the following link <info>https://toggl.com/app/profile</info>): ', '');
+	    $question3 = new Question('Please enter your api key for Toggl ( You can find this at the following link <info>https://toggl.com/app/profile</info> ): ', $toggl_api_key);
 
 	    $toggl_api_key = $helper->ask($input, $output, $question3);
 
@@ -80,6 +90,8 @@ class Configure extends Command
 	    	$output->writeln('<error>Couldn\'t find toggl api key. Please check it and try again.</error>');
 	    	return;
 	    }
+
+	    // Figure out a good way to add in workspace id without messing the whole process up.
 
 	    $data = array(
 		    'cb_api_user' => trim($cb_api_user),

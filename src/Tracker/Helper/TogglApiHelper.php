@@ -7,7 +7,6 @@ use Symfony\Component\Yaml\Exception\ParseException;
 
 class TogglApiHelper {
 	private $site_base_url = 'https://www.toggl.com/api/v8';
-	private $toggl_workspace_id = '';
 	
 	function __construct() {
 		$error = $this->getConfigData();
@@ -147,7 +146,7 @@ class TogglApiHelper {
 				}
 			}
 		}
-		
+
 		return $time_items;
 	}
 
