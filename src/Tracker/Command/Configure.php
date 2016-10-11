@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
 use Tracker\Helper\CodebaseApiHelper;
 use Tracker\Helper\TogglApiHelper;
@@ -46,7 +47,17 @@ class Configure extends Command
 
     	$file = $directory.'config.yml';
 
-    	$check_file = fopen($file, "w");
+    	$codebase_api_user = '';
+    	$codebase_api_key = '';
+    	$toggl_api_key = '';
+
+    	if(file_exists($file)) {
+    		$toggl_helper = new TogglApiHelper();
+    		$cb_helper = new CodebaseApiHelper();
+			$codebase_api_user = $cb_helper->api_user;
+			$codebase_api_key = $cb_helper->api_key;
+    		$toggl_api_key = $toggl_helper->api_key;
+    	}
 
     	// What do we need from the user?
     	// Codebase API User
@@ -54,7 +65,7 @@ class Configure extends Command
     	// Toggl API Key
 
     	$helper = $this->getHelper('question');
-	    $question = new Question('Please enter your api username for Codebase (You can generate this username here <info>https://creode.codebasehq.com/settings/profile</info>): ', '');
+	    $question = new Question('Please enter your api username for Codebase ( You can generate this username here <info>https://creode.codebasehq.com/settings/profile</info> ): ', $codebase_api_user);
 
 	    $cb_api_user = $helper->ask($input, $output, $question);
 
@@ -63,7 +74,7 @@ class Configure extends Command
 	    	return;
 	    }
 
-	    $question2 = new Question('Please enter your api key for Codebase (You can generate this key here <info>https://creode.codebasehq.com/settings/profile</info>): ', '');
+	    $question2 = new Question('Please enter your api key for Codebase ( You can generate this key here <info>https://creode.codebasehq.com/settings/profile</info> ): ', $codebase_api_key);
 
 	    $cb_api_key = $helper->ask($input, $output, $question2);
 
@@ -72,7 +83,7 @@ class Configure extends Command
 	    	return;
 	    }
 
-	    $question3 = new Question('Please enter your api key for Toggl (You can find this at the following link <info>https://toggl.com/app/profile</info>): ', '');
+	    $question3 = new Question('Please enter your api key for Toggl ( You can find this at the following link <info>https://toggl.com/app/profile</info> ): ', $toggl_api_key);
 
 	    $toggl_api_key = $helper->ask($input, $output, $question3);
 
@@ -81,10 +92,71 @@ class Configure extends Command
 	    	return;
 	    }
 
+	    $api_caller_toggl = new TogglApiHelper();
+        $workspaces = $api_caller_toggl->workspaces();
+
+        // If we have a string it must be an error throw it
+        if(!is_array($workspaces)) {
+          $output->writeln('<error>'.$workspaces.'</error>');
+          return 500;
+        }
+
+        // If we don't have any throw an error
+        if(empty($workspaces)) {
+        	$output->writeln('<error>Couldn\'t find a workspace to use when importing projects. Please check your toggl api key is correct.</error>');
+        	return 404;
+        }
+
+        if(isset($api_caller_toggl->workspace_id) && $api_caller_toggl->workspace_id) {
+        	$toggl_workspace_id = $api_caller_toggl->workspace_id;
+
+        	$question_helper = $this->getHelper('question');
+        } else {
+        	// Set the workspace id by default to the first workspace. This can change if we have more than one.
+	        $toggl_workspace_id = $workspaces[0]['id'];
+
+	        $question_helper = $this->getHelper('question');
+        }
+
+        // Check for the creode workspace
+        if(count($workspaces) > 1) {
+        	$workspace_names = array();
+
+        	// Loop through workspaces to map what we want.
+        	foreach($workspaces as $workspace) {
+        		$workspace_names[] = $workspace['name'].' {'.$workspace['id'].'}';
+        	}
+
+        	// Allow user to pick which workspace they want to use
+        	$question = new ChoiceQuestion(
+        		'Please select which project to use',
+        		$workspace_names,
+        		'0'
+        	);
+
+        	// Set a custom error message
+        	$question->setErrorMessage('Workspace %s is invalid.');
+
+        	// Ask the question
+        	$option_selection = $question_helper->ask($input, $output, $question);
+
+        	$output->writeln('<info>Selected the '.$option_selection.' workspace</info>');
+
+        	// Set the id
+          	$format_helper = new FormatHelper();
+        	$toggl_workspace_id = $format_helper->get_string_between($option_selection);
+
+        	// Check the id and if there isn't one then set an error
+        	if($toggl_workspace_id == false) {
+        		$question->setErrorMessage('Workspace %s does not contain an id.');
+        	}
+        }
+
 	    $data = array(
 		    'cb_api_user' => trim($cb_api_user),
 		    'cb_api_key' => trim($cb_api_key),
 		    'toggl_api_key' => trim($toggl_api_key),
+		    'toggl_workspace_id' => trim(intval($toggl_workspace_id))
 		);
 
 		$yaml = Yaml::dump($data);

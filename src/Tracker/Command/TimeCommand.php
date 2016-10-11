@@ -41,6 +41,69 @@ class TimeCommand extends Command
         // Figure out which date type we are using
         $date_type = $input->getArgument('Date Type');
 
+        // Load in the Toggl Helper
+        $toggl_helper = new TogglApiHelper();
+
+        if(isset($toggl_helper->workspace_id) && $toggl_helper->workspace_id) {
+            $workspace_id = $toggl_helper->workspace_id;
+        } else {
+            // Check which workspace to use.
+            $workspaces = $toggl_helper->workspaces();
+
+            // If we have a string it must be an error throw it
+            if(!is_array($workspaces)) {
+              $output->writeln('<error>'.$workspaces.'</error>');
+              return 500;
+            }
+
+            // If we don't have any throw an error
+            if(empty($workspaces)) {
+                $output->writeln('<error>Couldn\'t find a workspace to use when importing projects. Please check your toggl api key is correct.</error>');
+                return 404;
+            }
+
+            // Set the workspace id by default to the first workspace. This can change if we have more than one.
+            $workspace_id = $workspaces[0]['id'];
+
+            $question_helper = $this->getHelper('question');
+
+            // Check for the creode workspace
+            if(count($workspaces) > 1) {
+                $workspace_names = array();
+
+                // Loop through workspaces to map what we want.
+                foreach($workspaces as $workspace) {
+                    $workspace_names[] = $workspace['name'].' {'.$workspace['id'].'}';
+                }
+
+                // Allow user to pick which workspace they want to use
+                $question = new ChoiceQuestion(
+                    'Please select which project to use',
+                    $workspace_names,
+                    '0,1'
+                );
+
+                // Set a custom error message
+                $question->setErrorMessage('Workspace %s is invalid.');
+
+                // Ask the question
+                $option_selection = $question_helper->ask($input, $output, $question);
+
+                $output->writeln('<info>Selected the '.$option_selection.' workspace</info>');
+
+                // Set the id
+                $format_helper = new FormatHelper();
+                $workspace_id = $format_helper->get_string_between($option_selection);
+
+                // Check the id and if there isn't one then set an error
+                if($workspace_id == false) {
+                    $question->setErrorMessage('Workspace %s does not contain an id.');
+                }
+            }
+        }
+
+        $workspace_id = intval($workspace_id);
+
         // Check the day
         switch($date_type) {
             case 'today':
@@ -151,9 +214,7 @@ class TimeCommand extends Command
         	}
         }
 
-        // Load in the toggl helper and get all time entries based
-        // on the given dates
-        $toggl_helper = new TogglApiHelper();
+        // Get all time entries based on the given dates
         $toggl_config_data = $toggl_helper->getConfigData();
 
         if($toggl_config_data !== true) {
@@ -163,7 +224,7 @@ class TimeCommand extends Command
 
         $output->writeln('<fg=white;bg=black>Pulling in times from Toggl.</>');
 
-        $times = $toggl_helper->times($start_date_formatted, $end_date_formatted);
+        $times = $toggl_helper->times($start_date_formatted, $end_date_formatted, $workspace_id);
 
         $projects = '';
         $errors = array();
