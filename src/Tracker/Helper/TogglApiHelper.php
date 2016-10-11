@@ -205,7 +205,8 @@ class TogglApiHelper {
 				return 'Cannot parse config file. Please check that this has been created.';
 			}
 
-			$this->api_key = $value['toggl_api_key']; // Codebase api key
+			$this->api_key = $value['toggl_api_key']; // Toggl api key
+			$this->workspace_id = intval($value['toggl_workspace_id']); // Current workspace in Toggl
 
 			return true;
 		}
