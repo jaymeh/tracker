@@ -7,7 +7,6 @@ use Symfony\Component\Yaml\Exception\ParseException;
 
 class TogglApiHelper {
 	private $site_base_url = 'https://www.toggl.com/api/v8';
-	private $toggl_workspace_id = '';
 	
 	function __construct() {
 		$error = $this->getConfigData();
@@ -15,7 +14,6 @@ class TogglApiHelper {
 			echo $error;
 			exit;
 		}
-
 	}
 
 	private function call($endpoint) {
@@ -134,10 +132,20 @@ class TogglApiHelper {
 		}
 	}
 
-	public function times($start_date, $end_date) {
+	public function times($start_date, $end_date, $workspace_id = false) {
 		$endpoint = '/time_entries?start_date='.urlencode($start_date).'&end_date='.urlencode($end_date);
 
 		$time_items = $this->call($endpoint);
+
+		// Because the API Call doesn't allow us to filter based on workspace_id
+		// I will do it myself :D
+		foreach($time_items as $key => $time_item) {
+			if($workspace_id !== false) {
+				if(isset($time_item['wid']) && $time_item['wid'] !== $workspace_id) {
+					unset($time_items[$key]);
+				}
+			}
+		}
 
 		return $time_items;
 	}
@@ -197,7 +205,8 @@ class TogglApiHelper {
 				return 'Cannot parse config file. Please check that this has been created.';
 			}
 
-			$this->api_key = $value['toggl_api_key']; // Codebase api key
+			$this->api_key = $value['toggl_api_key']; // Toggl api key
+			$this->workspace_id = intval($value['toggl_workspace_id']); // Current workspace in Toggl
 
 			return true;
 		}
