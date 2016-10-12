@@ -383,6 +383,9 @@ class TimeCommand extends Command
                         // Strip out the touch for the description in future
                         $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
 
+                        // Add total tracked mins to project
+                        $total_tracked_minutes += intval(round($duration));
+
                         // Output something to help see whats happening
                         $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
                     }                    
@@ -414,7 +417,8 @@ class TimeCommand extends Command
                     // Log the time entry
                     $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
 
-                    $total_tracked_minutes += intval(round($time['duration'] / 60));
+                    // Add total tracked time to duration
+                    $total_tracked_minutes += intval(round($duration));
 
                     // Output something to help see whats happening
                     $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
