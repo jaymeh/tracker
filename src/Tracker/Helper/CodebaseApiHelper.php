@@ -125,6 +125,10 @@ class CodebaseApiHelper {
 			return false;
 		}
 
+		if(!$time['summary']) {
+			return false;
+		}
+
 		$data_array['minutes'] = intval(round($time['duration'] / 60));
 		
 		if($note !== false) {

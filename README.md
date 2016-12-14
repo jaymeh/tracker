@@ -13,4 +13,4 @@ Command line Tracker app which specialises in taking times recorded in Toggl and
 # Build
 
 Install the [box](http://box-project.org/) tool, then run `box build` to build
-a PHAR file. Then you can launch the app: `./cliph.phar`.
+a PHAR file. Then you can launch the app: `./tracker.phar`.
