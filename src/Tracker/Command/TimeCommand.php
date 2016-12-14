@@ -320,6 +320,13 @@ class TimeCommand extends Command
             // If we don't have a project item with name skip it.
             // Maybe in future we can email a report of this.
             if(!isset($cb_project_data[$project['name']])) {
+                $output->writeln('<comment>Could not find project data for time entry: '.$time_entry['description'].'</comment>');
+                continue;
+            }
+
+            if(!$time_entry['description']) {
+                // Report project error
+                $output->writeln('<error>Could not find description for time entry on project: '.$cb_project_data[$project['name']].'</error>');
                 continue;
             }
 
