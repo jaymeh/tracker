@@ -44,6 +44,8 @@ class TimeCommand extends Command
         // Load in the Toggl Helper
         $toggl_helper = new TogglApiHelper();
 
+        // Check workspace id.
+        /* NOTE: THIS COULD BE IN ITS OWN FUNCTION */
         if(isset($toggl_helper->workspace_id) && $toggl_helper->workspace_id) {
             $workspace_id = $toggl_helper->workspace_id;
         } else {
@@ -102,6 +104,7 @@ class TimeCommand extends Command
             }
         }
 
+        // Convert to workspace id. Also could be in above function
         $workspace_id = intval($workspace_id);
 
         // Check the day
