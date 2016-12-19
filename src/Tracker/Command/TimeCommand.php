@@ -44,69 +44,15 @@ class TimeCommand extends Command
         // Load in the Toggl Helper
         $toggl_helper = new TogglApiHelper();
 
-        // Check workspace id.
-        /* NOTE: THIS COULD BE IN ITS OWN FUNCTION */
-        if(isset($toggl_helper->workspace_id) && $toggl_helper->workspace_id) {
-            $workspace_id = $toggl_helper->workspace_id;
-        } else {
-            // Check which workspace to use.
-            $workspaces = $toggl_helper->workspaces();
-
-            // If we have a string it must be an error throw it
-            if(!is_array($workspaces)) {
-              $output->writeln('<error>'.$workspaces.'</error>');
-              return 500;
-            }
-
-            // If we don't have any throw an error
-            if(empty($workspaces)) {
-                $output->writeln('<error>Couldn\'t find a workspace to use when importing projects. Please check your toggl api key is correct.</error>');
-                return 404;
-            }
-
-            // Set the workspace id by default to the first workspace. This can change if we have more than one.
-            $workspace_id = $workspaces[0]['id'];
-
-            $question_helper = $this->getHelper('question');
-
-            // Check for the creode workspace
-            if(count($workspaces) > 1) {
-                $workspace_names = array();
-
-                // Loop through workspaces to map what we want.
-                foreach($workspaces as $workspace) {
-                    $workspace_names[] = $workspace['name'].' {'.$workspace['id'].'}';
-                }
-
-                // Allow user to pick which workspace they want to use
-                $question = new ChoiceQuestion(
-                    'Please select which project to use',
-                    $workspace_names,
-                    '0,1'
-                );
-
-                // Set a custom error message
-                $question->setErrorMessage('Workspace %s is invalid.');
-
-                // Ask the question
-                $option_selection = $question_helper->ask($input, $output, $question);
-
-                $output->writeln('<info>Selected the '.$option_selection.' workspace</info>');
-
-                // Set the id
-                $format_helper = new FormatHelper();
-                $workspace_id = $format_helper->get_string_between($option_selection);
-
-                // Check the id and if there isn't one then set an error
-                if($workspace_id == false) {
-                    $question->setErrorMessage('Workspace %s does not contain an id.');
-                }
-            }
+        // Get the workspace id
+        $workspace_id = $this->getWorkspace($toggl_helper, $input, $output);
+        if($workspace_id == false) {
+            return $output->writeln('<error>Couldn\'t determine workspace id</error>');
         }
 
-        // Convert to workspace id. Also could be in above function
-        $workspace_id = intval($workspace_id);
+        
 
+        /* TRY AND MOVE THIS TO ANOTHER FUNCTION */
         // Check the day
         switch($date_type) {
             case 'today':
@@ -185,6 +131,7 @@ class TimeCommand extends Command
         $cb_helper = new CodebaseApiHelper();
         $config_data = $cb_helper->getConfigData();
 
+        // Error
         if($config_data !== true) {
         	$output->writeln('<error>'.$config_data.'</error>');
         	return;
@@ -388,7 +335,7 @@ class TimeCommand extends Command
 
                     if($duplicate == false) {
                         // Log the ticket
-                        $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
+                        /*$server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
 
                         // Strip out the touch for the description in future
                         $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
@@ -397,7 +344,7 @@ class TimeCommand extends Command
                         $total_tracked_minutes += intval(round($duration));
 
                         // Output something to help see whats happening
-                        $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
+                        $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>'); */
                     }                    
                     
                     continue;
@@ -425,13 +372,13 @@ class TimeCommand extends Command
 
                 if(!$duplicate) {
                     // Log the time entry
-                    $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
+                    /*$server_response = $cb_helper->createTimeSession($project_link, $time, $note);
 
                     // Add total tracked time to duration
                     $total_tracked_minutes += intval(round($duration));
 
                     // Output something to help see whats happening
-                    $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
+                    $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>'); */
                 }
             }
         }
@@ -441,5 +388,71 @@ class TimeCommand extends Command
             $output->writeln('<fg=white;bg=black>You have tracked a total of '.$formatted_minutes.'.</>');
         }
 
+    }
+
+    private function getWorkspace($toggl_helper, &$input, &$output) {
+        // Check workspace id.
+        if(isset($toggl_helper->workspace_id) && $toggl_helper->workspace_id) {
+            $workspace_id = $toggl_helper->workspace_id;
+        } else {
+            // Check which workspace to use.
+            $workspaces = $toggl_helper->workspaces();
+
+            // If we have a string it must be an error throw it
+            if(!is_array($workspaces)) {
+              $output->writeln('<error>'.$workspaces.'</error>');
+              return false;
+            }
+
+            // If we don't have any throw an error
+            if(empty($workspaces)) {
+                $output->writeln('<error>Couldn\'t find a workspace to use when importing projects. Please check your toggl api key is correct.</error>');
+                return false;
+            }
+
+            // Set the workspace id by default to the first workspace. This can change if we have more than one.
+            $workspace_id = $workspaces[0]['id'];
+
+            $question_helper = $this->getHelper('question');
+
+            // Check for the creode workspace
+            if(count($workspaces) > 1) {
+                $workspace_names = array();
+
+                // Loop through workspaces to map what we want.
+                foreach($workspaces as $workspace) {
+                    $workspace_names[] = $workspace['name'].' {'.$workspace['id'].'}';
+                }
+
+                // Allow user to pick which workspace they want to use
+                $question = new ChoiceQuestion(
+                    'Please select which project to use',
+                    $workspace_names,
+                    '0,1'
+                );
+
+                // Set a custom error message
+                $question->setErrorMessage('Workspace %s is invalid.');
+
+                // Ask the question
+                $option_selection = $question_helper->ask($input, $output, $question);
+
+                $output->writeln('<info>Selected the '.$option_selection.' workspace</info>');
+
+                // Set the id
+                $format_helper = new FormatHelper();
+                $workspace_id = $format_helper->get_string_between($option_selection);
+
+                // Check the id and if there isn't one then set an error
+                if($workspace_id == false) {
+                    $question->setErrorMessage('Workspace %s does not contain an id.');
+                }
+            }
+        }
+
+        // Convert to workspace id. Also could be in above function
+        $workspace_id = intval($workspace_id);
+
+        return $workspace_id;
     }
 }
