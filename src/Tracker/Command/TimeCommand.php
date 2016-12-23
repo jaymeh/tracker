@@ -140,7 +140,7 @@ class TimeCommand extends Command
 
         // TODO: Show a counter/progress bar.
 
-        /* SPLIT ME INTO MULTIPLE FUNCTIONS TO MAKE ME EASIER TO READ */
+        /* SPLIT ME INTO MULTIPLE FUNCTIONS TO MAKE ME EASIER TO READ... PLEASE!!!! */
 
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
@@ -154,6 +154,8 @@ class TimeCommand extends Command
 
             // Get project item based on the project from Toggl
             $cb_project_item = $cb_project_data[$project['name']];
+
+            // Setup description for time entry as note
             $note = $time_entry['description'];
 
             if($cb_project_item) {
@@ -182,7 +184,10 @@ class TimeCommand extends Command
                 // in seconds so we convert it to minutes.
                 $duration = $time['duration'] / 60;
 
-                var_dump($duration);
+                if($duration < 0) {
+                    $output->writeln('<error>Invalid duration found for time entry: '.$time_entry['description'].'. It may be because this entry is still tracking in Toggl. Please check this and try again.</error>');
+                    continue;
+                }
 
                 if($ticket_id) {
                     /* If its a ticket then check that the date, id and project match */
@@ -209,8 +214,12 @@ class TimeCommand extends Command
 
                     if($duplicate == false) {
                         // Log the ticket
-                        // var_dump($project_link, $time, $note, $ticket_id);
-                        /* $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
+                        $server_response = $cb_helper->createTimeSession($project_link, $time, $note, $ticket_id);
+
+                        if($server_response !== true) {
+                            $output->writeln('<error>'.$server_response.'</error>');
+                            continue;
+                        }
 
                         // Strip out the touch for the description in future
                         $stripped_duration = $format_helper->delete_all_between($note, '[', ']');
@@ -219,7 +228,7 @@ class TimeCommand extends Command
                         $total_tracked_minutes += intval(round($duration));
 
                         // Output something to help see whats happening
-                        $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>'); */
+                        $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
                     }                    
                     
                     continue;
@@ -247,18 +256,25 @@ class TimeCommand extends Command
 
                 if(!$duplicate) {
                     // Log the time entry
-                    // var_dump($project_link, $time, $note);
-                    /* $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
+                    $server_response = $cb_helper->createTimeSession($project_link, $time, $note);
+
+                    // Improve Error Reporting
+                    if($server_response !== true) {
+                        $output->writeln('<error>'.$server_response.'</error>');
+                        continue;
+                    }
 
                     // Add total tracked time to duration
                     $total_tracked_minutes += intval(round($duration));
 
                     // Output something to help see whats happening
-                    $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>'); */
+                    $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes</info>');
+                    
                 }
             }
         }
 
+        // Report total tracked time
         if($total_tracked_minutes !== 0) {
             $formatted_minutes = $format_helper->convert_codebase_minutes($total_tracked_minutes);
             $output->writeln('<fg=white;bg=black>You have tracked a total of '.$formatted_minutes.'.</>');
@@ -454,8 +470,6 @@ class TimeCommand extends Command
                             $time_new_end_formatted == $end_formatted &&
                             $description == $time_new['description'] &&
                             $project == $time_new['pid']) {
-
-
 
                             if(isset($times[$key])) {
                                 $times[$key]['duration'] += $time_new['duration'];

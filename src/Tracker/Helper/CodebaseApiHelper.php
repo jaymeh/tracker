@@ -114,26 +114,24 @@ class CodebaseApiHelper {
 
 		// Check that the time entry exists?
 		if(!isset($time['start'])) {
-			return false;
+			return 'Couldn\'t get start time from time entry';
 		}
 
 		if(!$start_timestamp = strtotime($time['start'])) {
-			return false;
+			return 'Couldn\'t parse start time from time entry';
 		}
 
 		if(!isset($time['duration'])) {
-			return false;
-		}
-
-		if(!$time['summary']) {
-			return false;
+			return 'Couldn\'t get duration for time entry';
 		}
 
 		$data_array['minutes'] = intval(round($time['duration'] / 60));
 		
-		if($note !== false) {
-			$data_array['summary'] = $note;
+		if($note === false) {
+			return 'Couldn\'t find time description to send to codebase.';
 		}
+
+		$data_array['summary'] = $note;
 
 		$data_array['session-date'] = date('Y-m-d', $start_timestamp);
 
@@ -152,6 +150,10 @@ class CodebaseApiHelper {
 
 		$post_data = $xml_data->asXML();
 		$posted = $this->post($endpoint, $post_data);
+
+		if(isset($posted['error']) && count($posted['error'])) {
+			return $posted['error'];
+		}
 
 		$posted = true;
 
