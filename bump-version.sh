@@ -51,20 +51,20 @@ box build
 #
 git checkout gh-pages
 
-cp cliph.phar downloads/cliph-${TAG}.phar
-git add downloads/cliph-${TAG}.phar
+cp tracker.phar downloads/tracker-${TAG}.phar
+git add downloads/tracker-${TAG}.phar
 
-SHA1=$(openssl sha1 cliph.phar)
+SHA1=$(openssl sha1 tracker.phar)
 
-JSON='name:"cliph.phar"'
+JSON='name:"tracker.phar"'
 JSON="${JSON},sha1:\"${SHA1}\""
-JSON="${JSON},url:\"http://mattketmo.github.io/cliph/downloads/cliph-${TAG}.phar\""
+JSON="${JSON},url:\"http://mattketmo.github.io/tracker/downloads/tracker-${TAG}.phar\""
 JSON="${JSON},version:\"${TAG}\""
 
-if [ -f cliph.phar.pubkey ]; then
-    cp cliph.phar.pubkey pubkeys/cliph-${TAG}.phar.pubkeys
-    git add pubkeys/cliph-${TAG}.phar.pubkeys
-    JSON="${JSON},publicKey:\"http://mattketmo.github.io/cliph/pubkeys/cliph-${TAG}.phar.pubkey\""
+if [ -f tracker.phar.pubkey ]; then
+    cp tracker.phar.pubkey pubkeys/tracker-${TAG}.phar.pubkeys
+    git add pubkeys/tracker-${TAG}.phar.pubkeys
+    JSON="${JSON},publicKey:\"http://mattketmo.github.io/tracker/pubkeys/tracker-${TAG}.phar.pubkey\""
 fi
 
 #
