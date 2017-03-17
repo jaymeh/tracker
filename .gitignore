@@ -7,3 +7,5 @@ cliph.phar.pubkey
 tracker.phar
 tracker.phar.pubkey
 tracker.phar.version
+phar-private-nopassphrase.pem
+phar-private.pem.passphrase-protected
