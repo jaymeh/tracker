@@ -7,3 +7,6 @@ cliph.phar.pubkey
 tracker.phar
 tracker.phar.pubkey
 tracker.phar.version
+/.phpintel
+/phar-private.pem.passphrase-protected
+/phar-private-nopassphrase.pem
