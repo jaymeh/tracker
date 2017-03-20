@@ -17,6 +17,9 @@ fi
 # CHECK FORMAT OF THE TAG 
 php -r "if(preg_match('/^\d+\.\d+\.\d+(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?\$/',\$argv[1])) exit(0) ;else{ echo 'format of version tag is not invalid' . PHP_EOL ; exit(1);}" $1
 
+# CHECK WE HAVE BOX INSTALLED
+command -v box >/dev/null 2>&1 || { echo >&2 "This script requires box to be installed. Please see https://github.com/box-project/box2.  Aborting."; exit 1; }
+
 # CHECK THAT WE CAN CHANGE BRANCH
 git checkout gh-pages
 git checkout --quiet master
@@ -29,6 +32,6 @@ TAG=$1
 git checkout master
 git tag ${TAG}
 
-command -v box >/dev/null 2>&1 || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
+
 
 box build
