@@ -61,9 +61,7 @@ git checkout master
 
 REMOTE=$(git remote)
 
-echo ${REMOTE}
-
 # Make sure to add in commit
 echo "New version created. Now you should run:"
-echo "git push origin gh-pages"
-echo "git push origin ${TAG}"
+echo "git push ${REMOTE} gh-pages"
+echo "git push ${REMOTE} ${TAG}"
