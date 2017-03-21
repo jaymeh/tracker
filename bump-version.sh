@@ -59,7 +59,11 @@ git commit -m "Bump version ${TAG}"
 #Move back to the master branch
 git checkout master
 
+REMOTE=$(git remote)
+
+echo ${REMOTE}
+
 # Make sure to add in commit
 echo "New version created. Now you should run:"
 echo "git push origin gh-pages"
-echo "git push ${TAG}"
+echo "git push origin ${TAG}"
