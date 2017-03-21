@@ -7,7 +7,6 @@ if [ $# -ne 1 ]; then
   exit 65
 fi
 
-
 # CHECK MASTER BRANCH
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$CURRENT_BRANCH" != "master" ]]; then
@@ -18,69 +17,51 @@ fi
 # CHECK FORMAT OF THE TAG 
 php -r "if(preg_match('/^\d+\.\d+\.\d+(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?\$/',\$argv[1])) exit(0) ;else{ echo 'format of version tag is not invalid' . PHP_EOL ; exit(1);}" $1
 
+# CHECK WE HAVE BOX INSTALLED
+command -v box >/dev/null 2>&1 || { echo >&2 "This script requires box to be installed. Please see https://github.com/box-project/box2.  Aborting."; exit 1; }
 
-# CHECK jsawk COMMAND
-command -v jsawk >/dev/null 2>&1 || { echo "Error : Command jsawk is not installed on the system"; echo "See : https://github.com/micha/jsawk "; echo  "Exiting..." >&2; exit 65; }
-
-# CHECK js COMMAND
-command -v js >/dev/null 2>&1 || { echo "Error : Command js is not installed on the system"; echo "Should be fixed by installing spidermonkey "; echo  "Exiting..." >&2; exit 65; }
-
-# CHECK box COMMAND
-command -v box >/dev/null 2>&1 || { echo "Error : Command box is not installed on the system"; echo "See : https://github.com/box-project/box2 "; echo  "Exiting..." >&2; exit 65; }
-
-# CHECK python COMMAND
-command -v python >/dev/null 2>&1 || { echo "Error : Command python is not installed on the system"; echo  "Exiting..." >&2; exit 65; }
+# CHECK WE HAVE sha1sum INSTALLED
+command -v sha1sum >/dev/null 2>&1 || { echo >&2 "This script requires sha1sum to be installed. Please run 'brew install md5sha1sum'.  Aborting."; exit 1; }
 
 # CHECK THAT WE CAN CHANGE BRANCH
 git checkout gh-pages
 git checkout --quiet master
 
-
+# 
 TAG=$1
 
-
-#
-# Tag & build master branch
-#
+# TAG AND BUILD MASTER BRANCH
 git checkout master
 git tag ${TAG}
+
+# BUILD THE APPLICATION
 box build
 
-#
-# Copy executable file into GH pages
-#
+# Move tracker so that it doesn't get overwritten
+mv tracker.phar tracker
+
+# Change to gh-pages branch
 git checkout gh-pages
 
-cp cliph.phar downloads/cliph-${TAG}.phar
-git add downloads/cliph-${TAG}.phar
+#Move the file back again
+mv tracker tracker.phar
 
-SHA1=$(openssl sha1 cliph.phar)
+# Generate a sha1sum of the tracker file to track the version
+sha1sum tracker.phar > tracker.phar.version
 
-JSON='name:"cliph.phar"'
-JSON="${JSON},sha1:\"${SHA1}\""
-JSON="${JSON},url:\"http://mattketmo.github.io/cliph/downloads/cliph-${TAG}.phar\""
-JSON="${JSON},version:\"${TAG}\""
+# Add tracker and version info to file
+git add tracker.phar
+git add tracker.phar.version
 
-if [ -f cliph.phar.pubkey ]; then
-    cp cliph.phar.pubkey pubkeys/cliph-${TAG}.phar.pubkeys
-    git add pubkeys/cliph-${TAG}.phar.pubkeys
-    JSON="${JSON},publicKey:\"http://mattketmo.github.io/cliph/pubkeys/cliph-${TAG}.phar.pubkey\""
-fi
-
-#
-# Update manifest
-#
-cat manifest.json | jsawk -a "this.push({${JSON}})" | python -mjson.tool > manifest.json.tmp
-mv manifest.json.tmp manifest.json
-git add manifest.json
-
+# Commit Latest Version
 git commit -m "Bump version ${TAG}"
 
-#
-# Go back to master
-#
+#Move back to the master branch
 git checkout master
 
+REMOTE=$(git remote)
+
+# Make sure to add in commit
 echo "New version created. Now you should run:"
-echo "git push origin gh-pages"
-echo "git push ${TAG}"
+echo "git push ${REMOTE} gh-pages"
+echo "git push ${REMOTE} ${TAG}"
