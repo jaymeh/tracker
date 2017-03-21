@@ -47,7 +47,7 @@ git checkout gh-pages
 mv tracker tracker.phar
 
 # Generate a sha1sum of the tracker file to track the version
-sha1sum tracker.phar tracker.phar.version
+sha1sum tracker.phar > tracker.phar.version
 
 # Add tracker and version info to file
 git add tracker.phar
