@@ -29,11 +29,12 @@ class Configure extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-    	// $value = Yaml::parse(file_get_contents('/path/to/file.yml'));
-
     	$user = exec('whoami');
+        $home = $_SERVER['HOME'].'/';
 
-    	$directory = '/Users/'.$user.'/.tracker/';
+
+    	$directory = $home . '.tracker/';
+        // die($directory);
 
     	if(!file_exists($directory)) {
     		// Try to create directory
@@ -92,6 +93,22 @@ class Configure extends Command
 	    	return;
 	    }
 
+        $data = array(
+            'cb_api_user' => trim($cb_api_user),
+            'cb_api_key' => trim($cb_api_key),
+            'toggl_api_key' => trim($toggl_api_key),
+        );
+
+        $yaml = Yaml::dump($data);
+
+        if(file_put_contents($file, $yaml)) {
+            $output->writeln('<info>Successfully created configuration file at: '.$file.'</info>');
+            // return 1;
+        } else {
+            $output->writeln('<error>Couldn\'t create file at: '.$file.'</info>');
+        }
+
+        // Workspaces
 	    $api_caller_toggl = new TogglApiHelper();
         $workspaces = $api_caller_toggl->workspaces();
 
@@ -152,20 +169,16 @@ class Configure extends Command
         	}
         }
 
-	    $data = array(
-		    'cb_api_user' => trim($cb_api_user),
-		    'cb_api_key' => trim($cb_api_key),
-		    'toggl_api_key' => trim($toggl_api_key),
-		    'toggl_workspace_id' => trim(intval($toggl_workspace_id))
-		);
+        $data['toggl_workspace_id'] = trim(intval($toggl_workspace_id));
 
-		$yaml = Yaml::dump($data);
+        $yaml = Yaml::dump($data);
 
-		if(file_put_contents($file, $yaml)) {
-			$output->writeln('<info>Successfully created configuration file at: '.$file.'</info>');
-			return 1;
-		}
+        if(file_put_contents($file, $yaml)) {
+            $output->writeln('<info>Successfully created configuration file at: '.$file.'</info>');
+            return 1;
+        }
+        
+        $output->writeln('<error>Couldn\'t create file at: '.$file.'</info>');
 
-		$output->writeln('<error>Couldn\'t create file at: '.$file.'</info>');
     }
 }
