@@ -180,7 +180,8 @@ class TogglApiHelper {
 	public function getConfigData() {
 		$user = exec('whoami');
 
-		$directory = '/Users/'.$user.'/.tracker/';
+
+		$directory = $_SERVER['HOME'] . '/.tracker/';
 
 		if(!file_exists($directory)) {
     		// Try to create directory
@@ -206,7 +207,11 @@ class TogglApiHelper {
 			}
 
 			$this->api_key = $value['toggl_api_key']; // Toggl api key
-			$this->workspace_id = intval($value['toggl_workspace_id']); // Current workspace in Toggl
+
+			if(isset($value['toggl_workspace_id']))
+			{
+				$this->workspace_id = intval($value['toggl_workspace_id']); // Current workspace in Toggl
+			}
 
 			return true;
 		}

@@ -173,7 +173,7 @@ class CodebaseApiHelper {
 	public function getConfigData() {
 		$user = exec('whoami');
 
-		$directory = '/Users/'.$user.'/.tracker/';
+		$directory = $_SERVER['HOME'] . '/.tracker/';
 
 		if(!file_exists($directory)) {
     		// Try to create directory
