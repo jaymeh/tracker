@@ -144,6 +144,10 @@ class TimeCommand extends Command
 
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
+            if(!isset($time_entry['pid'])) {
+                continue;
+            }
+
             // Load in the toggl project data
             $project = $toggl_helper->getProjectById($time_entry['pid']);
 
