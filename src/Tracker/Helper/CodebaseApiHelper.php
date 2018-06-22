@@ -131,7 +131,7 @@ class CodebaseApiHelper {
 			return 'Couldn\'t find time description to send to codebase.';
 		}
 
-		$data_array['summary'] = $note;
+		$data_array['summary'] = htmlspecialchars($note);
 
 		$data_array['session-date'] = date('Y-m-d', $start_timestamp);
 
