@@ -292,7 +292,7 @@ class TimeCommand extends Command
         // Report total tracked time
         if($total_tracked_minutes !== 0) {
             $formatted_minutes = $format_helper->convert_codebase_minutes($total_tracked_minutes);
-            $output->writeln('<fg=white;bg=black>You have tracked a total of '.$formatted_minutes.'.</>');
+            $output->writeln('<fg=white;bg=black>You have tracked a total of '.$formatted_minutes.' in this session.</>');
         }
 
     }
