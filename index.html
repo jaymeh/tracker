@@ -154,5 +154,24 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="container">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Automatically Import Your Times</h3>
+				</div>
+				<div class="panel-body">
+					Download the cron script from <a href="/cron.sh">here</a> and add it to <span class="code-snippet">~/.tracker/.</span><br /><br />
+					
+					Do the following to add a cronjob to call the script.<br /><br />
+					
+					<span class="code-snippet">crontab -e</span><br /><br />
+
+					In this file add the following code:<br /><br />
+
+					<span class="code-snippet">30 09 * * * cd /Users/{you}/.tracker && ./cron.sh</span>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
