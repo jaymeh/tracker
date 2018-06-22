@@ -3,14 +3,16 @@
     "description": "Command line tool to convert tracked time in Toggl and push it to Codebase",
     "license": "MIT",
     "require": {
-        "symfony/console": "~2.3",
+        "symfony/console": "~4.0",
         "symfony/yaml": "~2.8",
-        "herrera-io/phar-update": "~1.0",
         "padraic/phar-updater": "^1.0"
     },
     "autoload": {
         "psr-0": {
             "Tracker": "src"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7"
     }
 }
