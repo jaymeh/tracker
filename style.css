@@ -51,6 +51,6 @@ img {
     color: red;
     background-color: LightGray;
     border-radius: 5px;
-    font-weight: lighter;
+    font-weight: 300;
     font-style: italic;
 }
