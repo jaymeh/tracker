@@ -51,6 +51,7 @@ img {
     color: red;
     background-color: LightGray;
     border-radius: 5px;
-    font-weight: 300;
-    font-style: italic;
+    font-weight: lighter;
+    font-family: 'Source Code Pro', monospace;
+    line-height: 2.5;
 }
