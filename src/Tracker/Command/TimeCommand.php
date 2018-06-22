@@ -145,6 +145,7 @@ class TimeCommand extends Command
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
             if(!isset($time_entry['pid'])) {
+                $output->writeln('<comment>No project found for "'.$time_entry['description'].'" (' . date('d/m/Y H:i:s', strtotime($time_entry['start'])) . '). Skipping.</comment>');
                 continue;
             }
 
