@@ -44,24 +44,24 @@
 					<ol>
 						<li>Put tracker in folder we can access it and make it executable:</li>
 						<ul>
-							<li><b><i>sudo mv tracker /usr/bin/local/</i></b></li>
-							<li><b><i>sudo chmod 0755 /usr/bin/local/tracker</i></b></li>
+							<li><span class="code-snippet">sudo mv tracker /usr/bin/local/</span></li>
+							<li><span class="code-snippet">sudo chmod 0755 /usr/bin/local/tracker</span></li>
 						</ul>
 						<li>
 							Add /usr/local/bin to path if it doesn't exist add the following line to <i>~/.bash_profile</i>.
 						</li>
 						<ul>
-							<li><b><i>nano ~/.bash_profile</i></b></li>
-							<li><b><i>export PATH="/usr/local/bin:$PATH"</i></b></li>
-							<li><b><i>source ~/.bash_profile</i></b></li>
+							<li><span class="code-snippet">nano ~/.bash_profile</span></li>
+							<li><span class="code-snippet">export PATH="/usr/local/bin:$PATH"</span></li>
+							<li><span class="code-snippet">source ~/.bash_profile</span></li>
 						</ul>
 						<li>Check that the command exists by running the following in the command line.</li>
 						<ul>
-							<li><b><i>which tracker</i></b></li>
+							<li><span class="code-snippet">which tracker</span></li>
 						</ul>
 						<li>If you get a result like below then everything is setup correctly. If not check that the permissions of the tracker file is correct and that all commands above have been ran.</li>
 						<ul>
-							<li><b><i>/usr/local/bin/tracker</i></b></li>
+							<li><span class="code-snippet">/usr/local/bin/tracker</span></li>
 						</ul>
 					</ol>
 				</div>
@@ -78,25 +78,41 @@
 
 					<h4>Initial Setup/Configuration</h4>
 
-					Run <b><i>tracker configure</i></b><br /><br />
+					Run <span class="code-snippet">tracker configure</span><br /><br />
 
 					This walks you through the initial setup of the application by requesting your codebase and toggl api keys as well as asking for the toggl workspace you would like to use.<br /><br />
 
 					<h4>Project Import</h4>
 
-					Run <b><i>tracker project-import</i></b><br /><br />
+					Run <span class="code-snippet">tracker project-import</span><br /><br />
 
 					This will ask if you want to import any projects into Toggl from Codebase which are archived or not. Type "y" to import or "n" to skip archived projects.<br /><br />
 
+					<h4>Attach ticket id to time entry</h4>
+
+					In order to add a ticket entry to toggl you need to reference it like so in the time description:<br /><br />
+
+					<span class="code-snippet">[touch: {ticket-id}]</span><br />
+					e.g. <br />
+					<span class="code-snippet">[touch: 162]</span><br /><br />
+
+					Also for time to be tracked each entry needs to have the correct project attached. You should have these projects populated in toggl if the project import script has ran.<br /><br />
+
+					The touch command will be stripped from the time entry before pushing into codebase so it makes sense to also add an extra description to a time entry like the title of the job or just some general information about what was tracker.<br /><br />
+
+					<span class="code-snippet">[touch: 162] Fixes a bug with the navigation</span><br /><br />
+
+					You can also just log generic time to a project by not adding the above touch command to the time entry.<br /><br />
+
 					<h4>Importing Time</h4>
 
-					Run <b><i>tracker-time-update {[today, yesterday, custom]}</i></b><br /><br />
+					Run <span class="code-snippet">tracker-time-update {[today, yesterday, custom]}</span><br /><br />
 
 					In the brackets above select any of the above items. Today will take all times from today and import them, yesterday will do do yesterday and custom will allow you to define a custom time range so you can batch import any time entries.<br /><br />
 
 					An example of a custom date range could be something like:<br /><br />
 
-					<b><i>tracker time-update custom 19/09/2017 23/09/2017</i></b>
+					<span class="code-snippet">tracker time-update custom 19/09/2017 23/09/2017</span><br /><br />
 
 					Which will import all times between those dates.<br /><br />
 
@@ -104,12 +120,32 @@
 
 					Tracker also comes with update and rollback commands which can be used like below:<br /><br />
 
-					<b><i>tracker update</i></b><br />
-					<b><i>tracker rollback</i></b><br /><br />
+					<span class="code-snippet">tracker update</span><br />
+					<span class="code-snippet">tracker rollback</span><br /><br />
 
 					Rather than following the installation steps above each time a new version of tracker is available the update command was added in so whenever a release is added with new features and bug fixes the update so that this is much easier.<br /><br />
 
 					The rollback command was added so that if a new release has broken some functionality or has introduced a new bug you can run that command to return back to the earlier version of the tool.<br /><br />
+
+					<h4>Certificate Download</h4>
+
+					In the header alongside the downloads we also have a certificate installation script. This can be downloaded and ran if the openssl certificates on the mac are out of date. We need to update these for the auto update functionality to get it to work correctly.<br /><br />
+
+					Usually this will occur and you need to install wget via the following brew command:<br /><br />
+
+					<span class="code-snippet">brew install wget</span><br /><br />
+
+					<b>NOTE: If you don't have brew installed you can download it from <a href="https://brew.sh/">here</a></b><br /><br />
+
+					To install the certficates download the install script, navigate to it in the command line and make sure it is executable:<br /><br />
+
+					<span class="code-snippet">chmod +x install.sh</span><br /><br />
+
+					Then run it:<br /><br />
+
+					<span class="code-snippet">./install.sh</span><br /><br />
+
+					You may be prompted to type in your password for the script to run.
 				</div>
 			</div>
 		</div>

@@ -45,3 +45,12 @@ img {
 .max-40 {
 	max-width: 40%;
 }
+
+.code-snippet {
+    padding: 5px;
+    color: red;
+    background-color: LightGray;
+    border-radius: 5px;
+    font-weight: lighter;
+    font-style: italic;
+}
