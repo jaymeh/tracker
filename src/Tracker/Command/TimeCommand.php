@@ -144,7 +144,18 @@ class TimeCommand extends Command
 
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
+            if(!isset($time_entry['description'])) {
+                $output->writeln('<error>No description found for time entry starting: (' . date('d/m/Y H:i:s', strtotime($time_entry['start'])) . '). Please add one and try again. Skipping.</error>');
+                continue;
+            }
+
+            if(!isset($time_entry['stop'])) {
+                $output->writeln('<error>No end time found for "'.$time_entry['description'].'" (' . date('d/m/Y H:i:s', strtotime($time_entry['start'])) . '). Skipping.</error>');
+                continue;
+            }
+
             if(!isset($time_entry['pid'])) {
+                $output->writeln('<comment>No project found for "'.$time_entry['description'].'" (' . date('d/m/Y H:i:s', strtotime($time_entry['start'])) . '). Skipping.</comment>');
                 continue;
             }
 
@@ -281,7 +292,7 @@ class TimeCommand extends Command
         // Report total tracked time
         if($total_tracked_minutes !== 0) {
             $formatted_minutes = $format_helper->convert_codebase_minutes($total_tracked_minutes);
-            $output->writeln('<fg=white;bg=black>You have tracked a total of '.$formatted_minutes.'.</>');
+            $output->writeln('<fg=white;bg=black>You have tracked a total of '.$formatted_minutes.' in this session.</>');
         }
 
     }
@@ -452,6 +463,10 @@ class TimeCommand extends Command
             $start_date_timestamp = strtotime($time_entry['start']);
             $start_formatted = date('d/m/Y', $start_date_timestamp);
 
+            if(!isset($time_entry['stop'])) {
+                continue;
+            }
+
             $end_date_timestamp = strtotime($time_entry['stop']);
             $end_formatted = date('d/m/Y', $end_date_timestamp);
 
@@ -462,6 +477,11 @@ class TimeCommand extends Command
 
                 // Loop through each time entry checking for the duplicates
                 foreach($times_temp as $new_key => $time_new) {
+                    if(!isset($time_new['description']))
+                    {
+                        continue;
+                    }
+
                     if($id !== $time_new['id']) {
                         $time_new_start_timestamp = strtotime($time_new['start']);
                         $time_new_start_formatted = date('d/m/Y', $time_new_start_timestamp);
