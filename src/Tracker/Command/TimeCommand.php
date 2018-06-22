@@ -144,6 +144,11 @@ class TimeCommand extends Command
 
         // Take the times given and loop through them.
         foreach($times as $time_entry) {
+            if(!isset($time_entry['stop'])) {
+                $output->writeln('<error>No end time found for "'.$time_entry['description'].'" (' . date('d/m/Y H:i:s', strtotime($time_entry['start'])) . '). Skipping.</error>');
+                continue;
+            }
+
             if(!isset($time_entry['pid'])) {
                 $output->writeln('<comment>No project found for "'.$time_entry['description'].'" (' . date('d/m/Y H:i:s', strtotime($time_entry['start'])) . '). Skipping.</comment>');
                 continue;
@@ -452,6 +457,10 @@ class TimeCommand extends Command
             $id = $time_entry['id'];
             $start_date_timestamp = strtotime($time_entry['start']);
             $start_formatted = date('d/m/Y', $start_date_timestamp);
+
+            if(!isset($time_entry['stop'])) {
+                continue;
+            }
 
             $end_date_timestamp = strtotime($time_entry['stop']);
             $end_formatted = date('d/m/Y', $end_date_timestamp);
