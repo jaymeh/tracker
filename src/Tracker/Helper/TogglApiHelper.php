@@ -29,7 +29,7 @@ class TogglApiHelper {
 		$response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 		if($response !== 200) {
-			$error = trim($xml_data);
+			$error = 'An error occured with the Toggl API. Please check your api key is correct.';
 			return $error;
 		}
 
@@ -179,7 +179,6 @@ class TogglApiHelper {
 
 	public function getConfigData() {
 		$user = exec('whoami');
-
 
 		$directory = $_SERVER['HOME'] . '/.tracker/';
 
