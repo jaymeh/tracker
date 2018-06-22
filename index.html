@@ -31,14 +31,86 @@
 			</div>
 		</div>
 
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">Installation Instructions</h3>
-			</div>
-			<div class="panel-body">
-				To install the tracker tool on your mac you need to download both the public key and the latest version of tracker from the download links in the header above.
+		<div class="container">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Installation Instructions</h3>
+				</div>
+				<div class="panel-body">
+					To install the tracker tool on your mac you need to download both the public key and the latest version of tracker from the download links in the header above.<br /><br />
 
-				
+					Open terminal and navigate to the folder you just downloaded the files to.<br /><br />
+
+					<ol>
+						<li>Put tracker in folder we can access it and make it executable:</li>
+						<ul>
+							<li><b><i>sudo mv tracker /usr/bin/local/</i></b></li>
+							<li><b><i>sudo chmod 0755 /usr/bin/local/tracker</i></b></li>
+						</ul>
+						<li>
+							Add /usr/local/bin to path if it doesn't exist add the following line to <i>~/.bash_profile</i>.
+						</li>
+						<ul>
+							<li><b><i>nano ~/.bash_profile</i></b></li>
+							<li><b><i>export PATH="/usr/local/bin:$PATH"</i></b></li>
+							<li><b><i>source ~/.bash_profile</i></b></li>
+						</ul>
+						<li>Check that the command exists by running the following in the command line.</li>
+						<ul>
+							<li><b><i>which tracker</i></b></li>
+						</ul>
+						<li>If you get a result like below then everything is setup correctly. If not check that the permissions of the tracker file is correct and that all commands above have been ran.</li>
+						<ul>
+							<li><b><i>/usr/local/bin/tracker</i></b></li>
+						</ul>
+					</ol>
+				</div>
+			</div>
+		</div>
+
+		<div class="container">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Using Tracker</h3>
+				</div>
+				<div class="panel-body">
+					Described here are details about how you can use tracker to send your information from Toggl into codebase and how you can update/rollback the tracker version.<br /><br />
+
+					<h4>Initial Setup/Configuration</h4>
+
+					Run <b><i>tracker configure</i></b><br /><br />
+
+					This walks you through the initial setup of the application by requesting your codebase and toggl api keys as well as asking for the toggl workspace you would like to use.<br /><br />
+
+					<h4>Project Import</h4>
+
+					Run <b><i>tracker project-import</i></b><br /><br />
+
+					This will ask if you want to import any projects into Toggl from Codebase which are archived or not. Type "y" to import or "n" to skip archived projects.<br /><br />
+
+					<h4>Importing Time</h4>
+
+					Run <b><i>tracker-time-update {[today, yesterday, custom]}</i></b><br /><br />
+
+					In the brackets above select any of the above items. Today will take all times from today and import them, yesterday will do do yesterday and custom will allow you to define a custom time range so you can batch import any time entries.<br /><br />
+
+					An example of a custom date range could be something like:<br /><br />
+
+					<b><i>tracker time-update custom 19/09/2017 23/09/2017</i></b>
+
+					Which will import all times between those dates.<br /><br />
+
+					<h4>Update and rollback</h4>
+
+					Tracker also comes with update and rollback commands which can be used like below:<br /><br />
+
+					<b><i>tracker update</i></b><br />
+					<b><i>tracker rollback</i></b><br /><br />
+
+					Rather than following the installation steps above each time a new version of tracker is available the update command was added in so whenever a release is added with new features and bug fixes the update so that this is much easier.<br /><br />
+
+					The rollback command was added so that if a new release has broken some functionality or has introduced a new bug you can run that command to return back to the earlier version of the tool.<br /><br />
+				</div>
 			</div>
 		</div>
 	</body>

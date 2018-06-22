@@ -3,3 +3,4 @@
 /phar-private.pem.passphrase-protected
 /phar-private-nopassphrase.pem
 /.travis
+/.DS_Store
