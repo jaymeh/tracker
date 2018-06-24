@@ -4,14 +4,13 @@ namespace Tracker\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-
 use Tracker\Helper\CodebaseApiHelper;
-use Tracker\Helper\TogglApiHelper;
 use Tracker\Helper\FormatHelper;
+use Tracker\Helper\TogglApiHelper;
 
 class ProjectImport extends Command
 {
@@ -20,6 +19,12 @@ class ProjectImport extends Command
         $this
             ->setName('project-import')
             ->setDescription('Imports Projects from Codebase')
+            ->addOption(
+                'purge',
+                'p',
+                InputOption::VALUE_NONE,
+                'Removes all current clients and projects before reimporting'
+            );
         ;
     }
 
@@ -43,6 +48,12 @@ class ProjectImport extends Command
 
         // Set the workspace id by default to the first workspace. This can change if we have more than one.
         $workspace_id = $workspaces[0]['id'];
+
+        $purge = ($input->getOption('purge'));
+        if($purge !== false)
+        {
+            $this->purgeClients($api_caller_toggl, $workspace_id);
+        }
 
         $question_helper = $this->getHelper('question');
 
@@ -151,5 +162,28 @@ class ProjectImport extends Command
         }
 
         return;
+    }
+
+    private function purgeClients($toggl_helper, $workspace_id)
+    {
+        // Trigger deletion.
+        
+        $clients = $toggl_helper->getClientsByWorkspace($workspace_id);
+
+        var_dump($clients);
+        die;
+
+        $client_count = count($clients);
+
+        // foreach($clients as $client)
+        // {
+        //     $client_response = $toggl_helper->deleteClient($endpoint);
+
+        //     var_dump($client_response);
+        // }
+        
+        https://www.toggl.com/api/v8/workspaces/{workspace_id}/clients
+        
+        // Get toggl api results for projects and clients.
     }
 }
