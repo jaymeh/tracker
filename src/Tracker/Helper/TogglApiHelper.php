@@ -69,6 +69,24 @@ class TogglApiHelper {
 		return $decoded_json;
 	}
 
+	private function delete($endpoint)
+	{
+		$ch = curl_init();
+	    curl_setopt($ch, CURLOPT_URL, $this->site_base_url.$endpoint);
+	    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+	    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_setopt($ch, CURLOPT_USERPWD, "$this->api_key:api_token");
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	    $result = curl_exec($ch);
+	    $result = json_decode($result);
+	    curl_close($ch);
+
+	    var_dump($result);
+	    die;
+
+	    return $result;
+	}
+
 	public function workspaces() {
 		$workspace = $this->call('/workspaces');
 
@@ -175,6 +193,31 @@ class TogglApiHelper {
 		    default:
 		    	return array('error_code' => $http_code, 'error_message' => trim($json_string));
 		}
+	}
+
+	public function getClientsByWorkspace($workspace_id) {
+		$endpoint = '/workspaces/'.$workspace_id.'/clients';
+
+		$clients = $this->call($endpoint);
+
+		if(isset($clients['data'])) {
+			$clients = $clients['data'];
+		}
+		
+		return $clients;
+	}
+
+	public function deleteClient($client_id)
+	{
+		$endpoint = '/clients/'.$client_id;
+
+		$client = $this->call($endpoint);
+
+		if(isset($client['data'])) {
+			$client = $client['data'];
+		}
+		
+		return $client;
 	}
 
 	public function getConfigData() {
