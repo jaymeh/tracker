@@ -2,18 +2,16 @@
 
 namespace Tracker\Helper;
 
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
+use Tracker\Helper\ConfigHelper;
 
 class TogglApiHelper {
 	private $site_base_url = 'https://www.toggl.com/api/v8';
+	private $config_helper;
 	
-	function __construct() {
-		$error = $this->getConfigData();
-		if($error !== true) {
-			echo $error;
-			exit;
-		}
+	function __construct(ConfigHelper $config_helper) {
+		$this->config_helper = $config_helper;
 	}
 
 	private function call($endpoint) {
@@ -21,7 +19,7 @@ class TogglApiHelper {
 		curl_setopt($ch, CURLOPT_URL, $this->site_base_url.$endpoint);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($ch, CURLOPT_USERPWD, "$this->api_key:api_token");
+		curl_setopt($ch, CURLOPT_USERPWD, $this->config_helper->getTogglApiKey() . ":api_token");
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 		$json_string = curl_exec($ch);
@@ -50,7 +48,7 @@ class TogglApiHelper {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($ch, CURLOPT_USERPWD, "$this->api_key:api_token");
+		curl_setopt($ch, CURLOPT_USERPWD, $this->config_helper->getTogglApiKey() . ":api_token");
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     		'Content-Type: application/json',
@@ -75,7 +73,7 @@ class TogglApiHelper {
 	    curl_setopt($ch, CURLOPT_URL, $this->site_base_url.$endpoint);
 	    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
 	    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($ch, CURLOPT_USERPWD, "$this->api_key:api_token");
+		curl_setopt($ch, CURLOPT_USERPWD, $this->config_helper->getTogglApiKey() . ":api_token");
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 	    $result = curl_exec($ch);
 	    $result = json_decode($result);
@@ -218,46 +216,5 @@ class TogglApiHelper {
 		}
 		
 		return $client;
-	}
-
-	public function getConfigData() {
-		$user = exec('whoami');
-
-		$directory = $_SERVER['HOME'] . '/.tracker/';
-
-		if(!file_exists($directory)) {
-    		// Try to create directory
-	    	$error = 'Failed to find directory: '.$directory.'. Please create this using the configure command';
-    	}
-
-    	$file = $directory.'config.yml';
-
-    	$error = false;
-
-    	try {
-    		if(!file_get_contents($file)) {
-    			return 'Could not find configuration file in '.$file.'. Please check that the configure command has been run.';
-    		}
-		    $value = Yaml::parse(file_get_contents($file));
-		} catch (ParseException $e) {
-		    $error = printf("Unable to parse the YAML string: %s", $e->getMessage());
-		}
-
-		if(!$error) {
-			if(!isset($value) || !is_array($value)) {
-				return 'Cannot parse config file. Please check that this has been created.';
-			}
-
-			$this->api_key = $value['toggl_api_key']; // Toggl api key
-
-			if(isset($value['toggl_workspace_id']))
-			{
-				$this->workspace_id = intval($value['toggl_workspace_id']); // Current workspace in Toggl
-			}
-
-			return true;
-		}
-
-		return $error;
 	}
 }

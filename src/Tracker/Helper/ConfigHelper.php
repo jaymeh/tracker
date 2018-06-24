@@ -2,11 +2,14 @@
 
 namespace Tracker\Helper;
 
+use Symfony\Component\Yaml\Yaml;
+
 class ConfigHelper {
 	protected $codebase_user;
 	protected $codebase_password;
-	protected $toggl_api;
+	protected $toggl_api_key;
 	protected $workspace_id;
+	protected $parsed_config;
 
 	public function __construct() {
 		$user = exec('whoami');
@@ -18,36 +21,35 @@ class ConfigHelper {
 	    	$directory_create = mkdir($directory, 0777, true);
 
 	    	if(!$directory_create) {
-	    		$error = 'Failed to create directory inside: '.$directory.'. Please check this is writeable by: '.$user;
-	    		return $error;
+	    		throw new Exception('Failed to create directory inside: '.$directory.'. Please check this is writable by: '.$user);
 	    	}
     	}
 
     	$file = $directory.'config.yml';
 
-    	$error = false;
-
     	try {
     		if(!file_get_contents($file)) {
-    			return 'Could not find configuration file in '.$file.'. Please check that the configure command has been run.';
+    			throw new Exception('Could not find configuration file in '.$file.'. Please check that the configure command has been run.');
     		}
-		    $value = Yaml::parse(file_get_contents($file));
+		    $this->parsed_config = Yaml::parse(file_get_contents($file), Yaml::PARSE_OBJECT);
 		} catch (ParseException $e) {
-		    $error = printf("Unable to parse the YAML string: %s", $e->getMessage());
+			throw new Exception("Unable to parse the string: " . $e->getMessage());
 		}
-
-		if(!$error) {
-			if(!isset($value) || !is_array($value)) {
-				return 'Cannot parse config file. Please check that this has been created.';
-			}
-
-			$this->api_user = $value['cb_api_user']; // Codebase api username
-			$this->api_key = $value['cb_api_key']; // Codebase api key
-
-			return true;
-		}
-
-		return $error;
 	}
+
+	public function getCodebaseUser() {
+		return isset($this->parsed_config['cb_api_user']) ?: null;
+	}
+
+	public function getCodebaseApiKey() {
+		return isset($this->parsed_config['cb_api_key']) ?: null;
+	}
+
+	public function getTogglApiKey() {
+		return isset($this->parsed_config['toggl_api_key']) ?: null;
+	}
+
+	public function getTogglWorkspaceId() {
+		return isset($this->parsed_config['toggl_workspace_id']) ?: null;
 	}
 }
