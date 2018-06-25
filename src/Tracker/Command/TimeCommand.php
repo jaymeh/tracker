@@ -50,7 +50,7 @@ class TimeCommand extends Command
             return $output->writeln('<error>Couldn\'t determine workspace id</error>');
         }
 
-        $inputted_dates = $this->checkDateType($date_type);
+        $inputted_dates = $this->checkDateType($input, $date_type);
 
         // If we can't get any data from the type we have then throw an error.
         if(!$inputted_dates) {
@@ -363,7 +363,7 @@ class TimeCommand extends Command
         return $workspace_id;
     }
 
-    private function checkDateType($date_type) {
+    private function checkDateType($input, $date_type) {
         // Check the day
         switch($date_type) {
             case 'today':
