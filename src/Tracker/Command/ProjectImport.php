@@ -59,7 +59,7 @@ class ProjectImport extends Command
             $question = new ChoiceQuestion(
                 'Please select which project to use',
                 $workspace_names,
-                '0,1'
+                0
             );
 
             // Set a custom error message
