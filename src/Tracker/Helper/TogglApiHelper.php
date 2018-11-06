@@ -137,6 +137,10 @@ class TogglApiHelper {
 
 		$time_items = $this->call($endpoint);
 
+		if(!$time_items || !count($time_items)) {
+			return $time_items;
+		}
+
 		// Because the API Call doesn't allow us to filter based on workspace_id
 		// I will do it myself :D
 		foreach($time_items as $key => $time_item) {
