@@ -127,6 +127,13 @@ class TimeCommand extends Command
 
         // Format the times array to how we want it
         $times = $this->formatTogglTimes($times, $toggl_helper, $cb_project_data);
+        
+        if(!$times || !count($times)) {
+            $formatted_start = $start_date->format('d/m/Y H:i:s');
+            $formatted_end = $end_date->format('d/m/Y H:i:s');
+            $output->writeln("<comment>No entries found between given time range. ($formatted_start - $formatted_end)</comment>");
+            return;
+        }
 
         // Let user know what we are doing
         $output->writeln('<fg=white;bg=black>Grabbing required projects for current toggle time range.</>');
