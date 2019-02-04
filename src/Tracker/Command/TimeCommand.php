@@ -89,13 +89,8 @@ class TimeCommand extends Command
 
         // Checks on the api for valid credentials
         if(!is_array($projects)) {
-            if($projects == 'HTTP Basic: Access denied.') {
-                $output->writeln('<error>Invalid API credentials provided. Please check them in your config file or re-run configure command.</error>');
-                return 500;
-            } else {
-                $output->writeln('<error>'.$projects.'</error>');
-                return 500;
-            }
+            $output->writeln('<error>Could not find any codebase projects. Please check your access keys and try again.</error>');
+            return 500;
         }
 
         // Setup placeholder for project data

@@ -92,8 +92,8 @@ class ProjectImport extends Command
         $codebase_projects = $cb_helper->projects($archived);
 
         if(!is_array($codebase_projects)) {
-          $output->writeln('<error>'.$codebase_projects.'</error>');
-          return 500;
+            $output->writeln('<error>Could not find any codebase projects. Please check your access keys and try again.</error>');
+            return 500;
         }
         
         // Loop through the projects
