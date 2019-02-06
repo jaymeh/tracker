@@ -538,23 +538,27 @@ class TimeCommand extends Command
     }
 
     private function validateTimeEntry($project, $cb_project_data, $time_entry, &$output) {
+
+        $session_timestamp = strtotime($time_entry['start']);
+        $session_date = date('Y-m-d', $session_timestamp);
+
         if(!$project) {
             // Report project error
-            $output->writeln('<error>Could not find codebase project attached to time entry: '.$time_entry['description'].'</error>');
+            $output->writeln('<error>Could not find codebase project attached to time entry: '.$time_entry['description'].' on ' . $session_date . '</error>');
             return false;
         }
 
         // If we don't have a project item with name skip it.
         // Maybe in future we can email a report of this.
         if(!isset($cb_project_data[$project['name']])) {
-            $output->writeln('<comment>Could not find project data for time entry: '.$time_entry['description'].'</comment>');
+            $output->writeln('<error>Could not find project data for time entry: '.$time_entry['description'].' on ' . $session_date . '</error>');
             return false;
         }
 
         // If we don't have a description for time entry then log an error
         if(!$time_entry['description']) {
             // Report project error
-            $output->writeln('<error>Could not find description for time entry on project: '.$project['name'].'</error>');
+            $output->writeln('<error>Could not find description for time entry on project: '.$project['name'].' on ' . $session_date . '</error>');
             return false;
         }
 
