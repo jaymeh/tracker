@@ -202,7 +202,7 @@ class TimeCommand extends Command
                 $duration = $time['duration'] / 60;
 
                 if($duration < 0) {
-                    $output->writeln('<error>Invalid duration found for time entry: '.$time_entry['description'].'. It may be because this entry is still tracking in Toggl. Please check this and try again.</error>');
+                    $output->writeln('<error>Invalid duration found for time entry: '.$time_entry['description'].' on ' . $session_date . '. It may be because this entry is still tracking in Toggl. Please check this and try again.</error>');
                     continue;
                 }
 
@@ -224,7 +224,7 @@ class TimeCommand extends Command
                             $codebase_time['session_date'] == $session_date &&
                             $codebase_time['minutes'] == intval(round($duration))) {
                             // Skip this because its already logged?
-                            $output->writeln('<comment>Duplicate entry found for ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes. Skipping this.</comment>');
+                            $output->writeln('<comment>Duplicate entry found for ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes on ' . $session_date . '. Skipping this.</comment>');
                             $duplicate = true;
                         }
                     }
@@ -245,8 +245,8 @@ class TimeCommand extends Command
                         $total_tracked_minutes += intval(round($duration));
 
                         // Output something to help see whats happening
-                        $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes</info>');
-                    }                    
+                        $output->writeln('<info>Tracked Time entry to ('.$cb_project_item['name'].': Ticket '.$ticket_id.') - "'.trim($stripped_duration).'" '.intval(round($duration)).' minutes on ' . $session_date . '</info>');
+                    }
                     
                     continue;
                 }
@@ -266,7 +266,7 @@ class TimeCommand extends Command
                         $codebase_time['session_date'] == $session_date &&
                         ($codebase_time['minutes']) == intval(round($duration))) {
                         // Skip this because its already logged?
-                        $output->writeln('<comment>Duplicate entry found for ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes. Skipping this.</comment>');
+                        $output->writeln('<comment>Duplicate entry found for ('.$cb_project_item['name'].') - "'.$time_entry['description'].'" '.intval(round($duration)).' minutes on ' . $session_date . '. Skipping this.</comment>');
                         $duplicate = true;
                     }
                 }
