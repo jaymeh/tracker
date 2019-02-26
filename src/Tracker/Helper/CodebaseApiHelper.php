@@ -137,7 +137,10 @@ class CodebaseApiHelper {
 
 		if($ticket_id !== false) {
 			$data_array['ticket-id'] = $ticket_id;
-			unset($data_array['summary']);
+
+            $format_helper = new FormatHelper();
+            $ticket_string = $format_helper->delete_all_between($data_array['summary'], '[', ']');
+			$data_array['summary'] = $ticket_string;
 		}
 
 		$data_array = array_flip($data_array);
