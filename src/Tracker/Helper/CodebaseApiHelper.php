@@ -135,7 +135,7 @@ class CodebaseApiHelper {
 
 		if($ticket_id !== false) {
 			$data_array['ticket-id'] = $ticket_id;
-			unset($data_array['summary']);
+			$data_array['summary'] = trim(substr($data_array['summary'], strpos($data_array['summary'], "]") + 1));
 		}
 
 		$data_array = array_flip($data_array);
