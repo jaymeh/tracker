@@ -4,4 +4,4 @@ Command line Tracker app which specialises in taking times recorded in Toggl and
 
 For installation instructions and documentation please see the github page.
 
-[Documentation](https://jamiesykescreode.github.io/tracker/)
+[Documentation](https://jaymeh.github.io/tracker/)
